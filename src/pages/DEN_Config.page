@@ -1,0 +1,70 @@
+<apex:page docType="html-5.0" sidebar="false" tabStyle="DEN_Config__c" controller="DEN_configController">
+    <apex:form >
+        <apex:pageMessages />
+        <apex:pageBlock title="Working hours configuration for {!$User.FirstName}, {!$User.LastName}">
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Save" action="{!save}"/>
+                <apex:commandButton value="Cancel"/>
+            </apex:pageBlockButtons>
+                        
+            <apex:pageBlockSection title="Please adjust your setup:" collapsible="false">
+                <apex:pageBlockSectionItem > 
+                    <apex:selectRadio value="{!configType}">
+                        <apex:selectOptions value="{!configTypeItems}"/>
+                	</apex:selectRadio>    
+                </apex:pageBlockSectionItem>
+			</apex:pageBlockSection>
+            
+            <apex:pageBlockSection showHeader="false" columns="2" >
+                <apex:pageBlockSectionItem id="WeekdaySelection">
+                    <apex:outputText >Select Weekday:</apex:outputText>
+                    <apex:selectList size="1" multiselect="false" value="{!weekdaySelected}">
+                        <apex:selectOptions value="{!weekdays}"></apex:selectOptions>
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+                
+                <apex:pageBlockSectionItem id="DaySelection"> 
+                    <apex:outputText >Select Date:</apex:outputText>
+                    <apex:input type="date" value="{!dateSelected}"/>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+                
+            <apex:pageBlockSection showHeader="false" columns="2" id="HourSelection">
+                <apex:pageBlockSectionItem >
+                    <apex:outputText >Starting Hour:</apex:outputText>
+                    <apex:selectList size="1" multiselect="false" value="{!startHselected}">
+                        <apex:selectOptions value="{!startHours}"></apex:selectOptions>
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >                    
+                    <apex:outputText >Ending Hour:</apex:outputText>
+                    <apex:selectList size="1" multiselect="false" value="{!endHselected}">
+                        <apex:selectOptions value="{!endHours}"></apex:selectOptions>
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+                
+                <apex:pageBlockSectionItem id="confirmConfig">
+                    <apex:commandButton value="Add" action="{!addToSummary}" reRender="Summary"/>
+                </apex:pageBlockSectionItem>                
+            </apex:pageBlockSection>  
+            
+            <apex:pageBlockSection title="Summary:" collapsible="false" columns="1" id="Summary">
+                <apex:pageBlockSectionItem >
+                    <apex:pageBlockTable var="con" value="{!configWeekDay}" style="width:40%;">
+                        <apex:column value="{!con.Weekday__c}"/>
+                        <apex:column value="{!con.StartingHour__c}"/>
+                        <apex:column value="{!con.EndingHour__c}"/>                        
+                    </apex:pageBlockTable>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:pageBlockTable var="con2" value="{!configDate}" style="width:40%;">
+                        <apex:column value="{!con2.Date__c}"/>
+                        <apex:column value="{!con2.StartingHour__c}"/>
+                        <apex:column value="{!con2.EndingHour__c}"/>                        
+                    </apex:pageBlockTable>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+        
+    	</apex:pageBlock>
+    </apex:form>	
+</apex:page>
