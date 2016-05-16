@@ -1,10 +1,10 @@
-<apex:page docType="html-5.0" sidebar="false" tabStyle="DEN_Config__c" controller="DEN_configController">
+<apex:page docType="html-5.0" sidebar="false" tabStyle="DEN_Config__c" controller="DEN_ConfigController">
     <apex:form >
-        <apex:pageMessages />
-        <apex:pageBlock title="Working hours configuration for {!$User.FirstName}, {!$User.LastName}">
+        <apex:pageMessages id="pageMessage"/>
+        <apex:pageBlock title="Working hours configuration for {!$User.FirstName} {!$User.LastName}">
             <apex:pageBlockButtons >
                 <apex:commandButton value="Save" action="{!save}"/>
-                <apex:commandButton value="Cancel"/>
+                <apex:commandButton value="Cancel" action="{!cancel}"/>
             </apex:pageBlockButtons>
                         
             <apex:pageBlockSection title="Please adjust your setup:" collapsible="false">
@@ -44,23 +44,39 @@
                 </apex:pageBlockSectionItem>
                 
                 <apex:pageBlockSectionItem id="confirmConfig">
-                    <apex:commandButton value="Add" action="{!addToSummary}" reRender="Summary"/>
+                    <apex:commandButton value="Add" action="{!addToSummary}" reRender="Summary,pageMessage"/>
                 </apex:pageBlockSectionItem>                
             </apex:pageBlockSection>  
             
             <apex:pageBlockSection title="Summary:" collapsible="false" columns="1" id="Summary">
                 <apex:pageBlockSectionItem >
-                    <apex:pageBlockTable var="con" value="{!configWeekDay}" style="width:40%;">
+                    <apex:pageBlockTable var="con" value="{!configWeekDay}" style="width:30%;">
                         <apex:column value="{!con.Weekday__c}"/>
                         <apex:column value="{!con.StartingHour__c}"/>
-                        <apex:column value="{!con.EndingHour__c}"/>                        
+                        <apex:column value="{!con.EndingHour__c}"/>    
+                        <apex:column headerValue="Action">
+                            <apex:commandLink value="Delete" action="{!removeRow}" reRender="Summary">
+                                <apex:param assignTo="{!rowWeekDay}" value="{!con.Weekday__c}" name="rowWeekDay"/>
+                                <apex:param assignTo="{!rowStartH}" value="{!con.StartingHour__c}" name="rowStartH"/>
+                                <apex:param assignTo="{!rowEndH}" value="{!con.EndingHour__c}" name="rowEndH"/>    
+                                <apex:param assignTo="{!rowDate}" value="{!TEXT(con.Date__c)}" name="rowDate"/>
+                            </apex:commandLink>
+                        </apex:column>
                     </apex:pageBlockTable>
                 </apex:pageBlockSectionItem>
                 <apex:pageBlockSectionItem >
-                    <apex:pageBlockTable var="con2" value="{!configDate}" style="width:40%;">
+                    <apex:pageBlockTable var="con2" value="{!configDate}" style="width:30%;">
                         <apex:column value="{!con2.Date__c}"/>
                         <apex:column value="{!con2.StartingHour__c}"/>
                         <apex:column value="{!con2.EndingHour__c}"/>                        
+                        <apex:column headerValue="Action">
+                            <apex:commandLink value="Delete" action="{!removeRow}" reRender="Summary">
+                                <apex:param assignTo="{!rowDate}" value="{!TEXT(con2.Date__c)}" name="rowDate"/>
+                                <apex:param assignTo="{!rowStartH}" value="{!con2.StartingHour__c}" name="rowStartH"/>
+                                <apex:param assignTo="{!rowEndH}" value="{!con2.EndingHour__c}" name="rowEndH"/>     
+                                <apex:param assignTo="{!rowWeekDay}" value="{!con2.Weekday__c}" name="rowWeekDay"/>
+                            </apex:commandLink>
+                        </apex:column>                        
                     </apex:pageBlockTable>
                 </apex:pageBlockSectionItem>
             </apex:pageBlockSection>
