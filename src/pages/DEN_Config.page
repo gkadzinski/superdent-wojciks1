@@ -1,4 +1,98 @@
 <apex:page docType="html-5.0" sidebar="false" tabStyle="DEN_Config__c" controller="DEN_ConfigController">
+    <apex:includeScript value="https://code.jquery.com/jquery-1.12.3.min.js"/>
+    <script type="text/javascript">
+    	j$ = jQuery.noConflict();
+    	j$(document).ready(function() {
+            var datePicklist = j$('[class*=dateSelected]');
+            var weekdayPicklist = j$('[class*=weekdaySelected]');
+            var endhsection = j$('[class*=endHselected]');
+            var starthsection = j$('[class*=startHselected]');
+            var starth = j$('[id*=startHselected]');
+            var endh = j$('[id*=endHselected]');
+            var weekday = j$('[id*=weekdaySelected]');
+            var day = j$('[id*=dateSelected]');
+            clearvalue(weekday);
+            datePicklist.hide();  	
+            endhsection.hide();
+            starthsection.hide();                                        
+                   
+            function filterStartHours(filterValue) {                
+            	j$('[class*=summaryRow]').each(function() {
+                    var value=j$(this).find('[class*=summaryColumn]').eq(0).text();
+                    var start=j$(this).find('[class*=summaryColumn]').eq(1).text();
+                    var end=j$(this).find('[class*=summaryColumn]').eq(2).text();
+					if(filterValue==value) {
+                    	hideBetween(starth,start,end);                                                
+                    }                    
+                });                
+            }
+            
+            function filterEndHours(filterValue, startday) {                
+                hideBetween(endh,0,+startday);                                                
+            	j$('[class*=summaryRow]').each(function() {
+                    var value=j$(this).find('[class*=summaryColumn]').eq(0).text();
+                    var start=j$(this).find('[class*=summaryColumn]').eq(1).text();
+                    var end=j$(this).find('[class*=summaryColumn]').eq(2).text();                    
+					if(filterValue==value && start>+startday) {
+                    	hideBetween(endh,start,endh.find('option').size());
+                    }                    
+                });                
+            }            
+            
+            function hideBetween(field, start, end) {                
+                field.find('option').each(function() {                                       
+                    if(+j$(this).val() >= +start && +j$(this).val() <= +end) {
+                        j$(this).hide();
+                    }
+                });				
+            }
+            
+            function showAll(field) {
+                field.find('option').each(function() {
+                    j$(this).show();
+                });
+            }                                        
+            
+            weekday.change(function() {
+                showAll(starth);                
+                starthsection.show();
+				clearvalue(starth);            
+                filterStartHours(weekday.val());
+                endhsection.hide();
+            });
+            
+            day.change(function() {
+				showAll(starth);                
+                starthsection.show();
+				clearvalue(starth);
+                //konsola zrzuca yyyy-mm-dd (u mnie na komputerze w domu)
+                console.log(day.val());
+                endhsection.hide();
+                var controllervalue = '{!dateSelected}';
+                //kontroller nic nie zrzuca
+                console.log(controllervalue);
+                //jak wyciagam text() z js to dostaje: 07/05/2016 (format salesforce)
+                
+            });
+            
+            j$('input:radio[name$=configType]').change(function() {                                
+                datePicklist.toggle();
+                weekdayPicklist.toggle();
+            });
+            
+            starth.change(function() {                
+                showAll(endh);
+            	endhsection.show();                                                
+				endh.val(+starth.val()+1); 
+                filterEndHours(weekday.val(),starth.val());
+            });                                    
+
+            function clearvalue(field) {                
+                field.val('');
+            }
+            
+		});
+    </script>
     <apex:form >
         <apex:pageMessages id="pageMessage"/>
         <apex:pageBlock title="Working hours configuration for {!$User.FirstName} {!$User.LastName}">
@@ -7,50 +101,50 @@
                 <apex:commandButton value="Cancel" action="{!cancel}"/>
             </apex:pageBlockButtons>
                         
-            <apex:pageBlockSection title="Please adjust your setup:" collapsible="false">
+            <apex:pageBlockSection title="Please adjust your setup:" collapsible="false" columns="1" >
                 <apex:pageBlockSectionItem > 
-                    <apex:selectRadio value="{!configType}">
+                    <apex:selectRadio value="{!configType}" id="configType">
                         <apex:selectOptions value="{!configTypeItems}"/>
                 	</apex:selectRadio>    
                 </apex:pageBlockSectionItem>
 			</apex:pageBlockSection>
             
-            <apex:pageBlockSection showHeader="false" columns="2" >
-                <apex:pageBlockSectionItem id="WeekdaySelection">
-                    <apex:outputText >Select Weekday:</apex:outputText>
-                    <apex:selectList size="1" multiselect="false" value="{!weekdaySelected}">
+            <apex:pageBlockSection showHeader="false" columns="1" >                
+                <apex:pageBlockSectionItem dataStyleClass="weekdaySelected" labelStyleClass="weekdaySelected">
+                    <apex:outputLabel for="weekdaySelected">Select Weekday:</apex:outputLabel>
+                    <apex:selectList size="1" multiselect="false" value="{!weekdaySelected}" id="weekdaySelected">
                         <apex:selectOptions value="{!weekdays}"></apex:selectOptions>
                     </apex:selectList>
-                </apex:pageBlockSectionItem>
-                
-                <apex:pageBlockSectionItem id="DaySelection"> 
-                    <apex:outputText >Select Date:</apex:outputText>
-                    <apex:input type="date" value="{!dateSelected}"/>
-                </apex:pageBlockSectionItem>
+                </apex:pageBlockSectionItem>    
+                                                 
+                <apex:pageBlockSectionItem dataStyleClass="dateSelected" labelStyleClass="dateSelected"> 
+                    <apex:outputLabel for="dateSelected">Select Date:</apex:outputLabel>
+                    <apex:input type="date" value="{!dateSelected}" id="dateSelected"/>
+                </apex:pageBlockSectionItem>                                                                                         
             </apex:pageBlockSection>
                 
-            <apex:pageBlockSection showHeader="false" columns="2" id="HourSelection">
-                <apex:pageBlockSectionItem >
+            <apex:pageBlockSection showHeader="false" columns="1" id="HourSelection">
+                <apex:pageBlockSectionItem dataStyleClass="startHselected" labelStyleClass="startHselected">
                     <apex:outputText >Starting Hour:</apex:outputText>
-                    <apex:selectList size="1" multiselect="false" value="{!startHselected}">
+                    <apex:selectList size="1" multiselect="false" value="{!startHselected}" id="startHselected">
                         <apex:selectOptions value="{!startHours}"></apex:selectOptions>
                     </apex:selectList>
                 </apex:pageBlockSectionItem>
-                <apex:pageBlockSectionItem >                    
+                <apex:pageBlockSectionItem dataStyleClass="endHselected" labelStyleClass="endHselected">                    
                     <apex:outputText >Ending Hour:</apex:outputText>
-                    <apex:selectList size="1" multiselect="false" value="{!endHselected}">
+                    <apex:selectList size="1" multiselect="false" value="{!endHselected}" id="endHselected">
                         <apex:selectOptions value="{!endHours}"></apex:selectOptions>
                     </apex:selectList>
                 </apex:pageBlockSectionItem>
                 
                 <apex:pageBlockSectionItem id="confirmConfig">
-                    <apex:commandButton value="Add" action="{!addToSummary}" reRender="Summary,pageMessage"/>
+                    <apex:commandButton value="Add" action="{!addToSummary}" reRender="Summary,pageMessage" oncomplete="alert('alert dziala, ale clearvalue(weekday); nie za bardzo');return false;"/>
                 </apex:pageBlockSectionItem>                
             </apex:pageBlockSection>  
             
-            <apex:pageBlockSection title="Summary:" collapsible="false" columns="1" id="Summary">
+            <apex:pageBlockSection title="Summary:" collapsible="false" columns="1" id="Summary" >
                 <apex:pageBlockSectionItem >
-                    <apex:pageBlockTable var="con" value="{!configWeekDay}" style="width:30%;">
+                    <apex:pageBlockTable var="con" value="{!configWeekDay}" columnClasses="summaryColumn" rowClasses="summaryRow">
                         <apex:column value="{!con.Weekday__c}"/>
                         <apex:column value="{!con.StartingHour__c}"/>
                         <apex:column value="{!con.EndingHour__c}"/>    
@@ -65,7 +159,7 @@
                     </apex:pageBlockTable>
                 </apex:pageBlockSectionItem>
                 <apex:pageBlockSectionItem >
-                    <apex:pageBlockTable var="con2" value="{!configDate}" style="width:30%;">
+                    <apex:pageBlockTable var="con2" value="{!configDate}" columnClasses="summaryColumn" rowClasses="summaryRow">
                         <apex:column value="{!con2.Date__c}"/>
                         <apex:column value="{!con2.StartingHour__c}"/>
                         <apex:column value="{!con2.EndingHour__c}"/>                        
