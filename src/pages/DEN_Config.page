@@ -141,7 +141,7 @@
                 </apex:pageBlockSectionItem>
                 
                 <apex:pageBlockSectionItem id="confirmConfig">
-                    <apex:commandButton value="Add" action="{!addToSummary}" reRender="Summary,pageMessage" oncomplete="alert('tu chce wyczyscic dany weekday/day');return false;"/>
+                    <apex:commandButton value="Add" action="{!addToSummary}" reRender="Summary,pageMessage" oncomplete="j$('[id*=weekdaySelected]').change();j$('[id*=dateSelected]').change();return false;"/>
                 </apex:pageBlockSectionItem>                
             </apex:pageBlockSection>  
             
