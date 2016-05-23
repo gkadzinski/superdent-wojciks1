@@ -113,7 +113,7 @@ public class DEN_ConfigController {
     public String rowEndH {get;set;}
     public String rowDate {get;set;}
     
-    public Date stringToDate(String s) {
+    private Date stringToDate(String s) {
         if (String.isNotBlank(s)) {
             Integer y = Integer.valueOf(s.substring(0,4));
             Integer m = Integer.valueOf(s.substring(5, 7));

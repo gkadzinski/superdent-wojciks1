@@ -32,8 +32,8 @@
             	j$('[class*=summaryRow]').each(function() {
                     var value=j$(this).find('[class*=summaryColumn]').eq(0).text();
                     var start=j$(this).find('[class*=summaryColumn]').eq(1).text();
-                    var end=j$(this).find('[class*=summaryColumn]').eq(2).text();                    
-					if(filterValue==value && start>+startday) {
+                    var end=j$(this).find('[class*=summaryColumn]').eq(2).text();                      
+					if(filterValue==value && start>+startday) {                        
                     	hideBetween(endh,start,endh.find('option').size());
                     }                    
                 });                
@@ -64,16 +64,16 @@
             day.change(function() {
 				showAll(starth);                
                 starthsection.show();
-				clearvalue(starth);
-                //konsola zrzuca yyyy-mm-dd (u mnie na komputerze w domu)
-                console.log(day.val());
-                endhsection.hide();
-                var controllervalue = '{!dateSelected}';
-                //kontroller nic nie zrzuca
-                console.log(controllervalue);
-                //jak wyciagam text() z js to dostaje: 07/05/2016 (format salesforce)
-                
+				clearvalue(starth);                           
+                var formattedDate = convertFormat(day.val());
+				filterStartHours(formattedDate);                
+                endhsection.hide();                
             });
+            
+            function convertFormat(date) {                
+                var splitted = date.split("-",3);                
+                return (splitted[2]+"/"+splitted[1]+"/"+splitted[0]);
+            }
             
             j$('input:radio[name$=configType]').change(function() {                                
                 datePicklist.toggle();
@@ -84,13 +84,16 @@
                 showAll(endh);
             	endhsection.show();                                                
 				endh.val(+starth.val()+1); 
-                filterEndHours(weekday.val(),starth.val());
+                if (datePicklist.is(':visible')) {                    
+                    filterEndHours(convertFormat(day.val()),starth.val());
+                } else {                    
+                    filterEndHours(weekday.val(),starth.val());
+                }                
             });                                    
 
             function clearvalue(field) {                
                 field.val('');
-            }
-            
+            }            
 		});
     </script>
     <apex:form >
@@ -138,7 +141,7 @@
                 </apex:pageBlockSectionItem>
                 
                 <apex:pageBlockSectionItem id="confirmConfig">
-                    <apex:commandButton value="Add" action="{!addToSummary}" reRender="Summary,pageMessage" oncomplete="alert('alert dziala, ale clearvalue(weekday); nie za bardzo');return false;"/>
+                    <apex:commandButton value="Add" action="{!addToSummary}" reRender="Summary,pageMessage" oncomplete="alert('tu chce wyczyscic dany weekday/day');return false;"/>
                 </apex:pageBlockSectionItem>                
             </apex:pageBlockSection>  
             
