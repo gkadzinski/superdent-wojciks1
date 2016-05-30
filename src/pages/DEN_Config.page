@@ -10,11 +10,12 @@
             var starth = j$('[id*=startHselected]');
             var endh = j$('[id*=endHselected]');
             var weekday = j$('[id*=weekdaySelected]');
-            var day = j$('[id*=dateSelected]');
+            var day = j$('[id*=dateSelected]');            
             clearvalue(weekday);
             datePicklist.hide();  	
             endhsection.hide();
-            starthsection.hide();                                        
+            starthsection.hide();  
+            highlightOverlapped();
                    
             function filterStartHours(filterValue) {                
             	j$('[class*=summaryRow]').each(function() {
@@ -37,7 +38,12 @@
                     	hideBetween(endh,start,endh.find('option').size());
                     }                    
                 });                
-            }            
+            }      
+            
+            function highlightOverlapped() {  
+                j$('[class*=summaryRow]').each(function() {                    
+                });                                                                           
+            }
             
             function hideBetween(field, start, end) {                
                 field.find('option').each(function() {                                       
@@ -53,11 +59,11 @@
                 });
             }                                        
             
-            weekday.change(function() {
+            weekday.change(function() {                
                 showAll(starth);                
                 starthsection.show();
 				clearvalue(starth);            
-                filterStartHours(weekday.val());
+                //filterStartHours(weekday.val());
                 endhsection.hide();
             });
             
@@ -65,8 +71,8 @@
 				showAll(starth);                
                 starthsection.show();
 				clearvalue(starth);                           
-                var formattedDate = convertFormat(day.val());
-				filterStartHours(formattedDate);                
+                //var formattedDate = convertFormat(day.val());
+                //filterStartHours(formattedDate);                
                 endhsection.hide();                
             });
             
@@ -83,101 +89,99 @@
             starth.change(function() {                
                 showAll(endh);
             	endhsection.show();                                                
-				endh.val(+starth.val()+1); 
-                if (datePicklist.is(':visible')) {                    
+				endh.val(+starth.val()+60); 
+                hideBetween(endh,0,+starth.val());
+                /*if (datePicklist.is(':visible')) {                    
                     filterEndHours(convertFormat(day.val()),starth.val());
                 } else {                    
                     filterEndHours(weekday.val(),starth.val());
-                }                
+                } */               
             });                                    
 
             function clearvalue(field) {                
                 field.val('');
-            }            
+            }  
+            
 		});
     </script>
+    
     <apex:form >
-        <apex:pageMessages id="pageMessage"/>
-        <apex:pageBlock title="Working hours configuration for {!$User.FirstName} {!$User.LastName}">
-            <apex:pageBlockButtons >
-                <apex:commandButton value="Save" action="{!save}"/>
-                <apex:commandButton value="Cancel" action="{!cancel}"/>
-            </apex:pageBlockButtons>
-                        
+        <apex:pageMessages id="pageMessage"/>        
+        <apex:pageBlock title="Working hours configuration for {!$User.FirstName} {!$User.LastName}">            
             <apex:pageBlockSection title="Please adjust your setup:" collapsible="false" columns="1" >
                 <apex:pageBlockSectionItem > 
                     <apex:selectRadio value="{!configType}" id="configType">
                         <apex:selectOptions value="{!configTypeItems}"/>
                 	</apex:selectRadio>    
                 </apex:pageBlockSectionItem>
-			</apex:pageBlockSection>
-            
+			</apex:pageBlockSection>            
             <apex:pageBlockSection showHeader="false" columns="1" >                
                 <apex:pageBlockSectionItem dataStyleClass="weekdaySelected" labelStyleClass="weekdaySelected">
-                    <apex:outputLabel for="weekdaySelected">Select Weekday:</apex:outputLabel>
-                    <apex:selectList size="1" multiselect="false" value="{!weekdaySelected}" id="weekdaySelected">
-                        <apex:selectOptions value="{!weekdays}"></apex:selectOptions>
-                    </apex:selectList>
-                </apex:pageBlockSectionItem>    
-                                                 
+                    <apex:outputLabel for="weekdaySelected">Select Weekday:</apex:outputLabel>                    
+                    <apex:inputField value="{!config.Weekday__c}" id="weekdaySelected"/>
+                </apex:pageBlockSectionItem>                                                     
                 <apex:pageBlockSectionItem dataStyleClass="dateSelected" labelStyleClass="dateSelected"> 
-                    <apex:outputLabel for="dateSelected">Select Date:</apex:outputLabel>
-                    <apex:input type="date" value="{!dateSelected}" id="dateSelected"/>
+                    <apex:outputLabel for="dateSelected">Select Date:</apex:outputLabel>                    
+                    <apex:inputField value="{!config.Date__c}" id="dateSelected"/>
                 </apex:pageBlockSectionItem>                                                                                         
-            </apex:pageBlockSection>
-                
+            </apex:pageBlockSection>                
             <apex:pageBlockSection showHeader="false" columns="1" id="HourSelection">
                 <apex:pageBlockSectionItem dataStyleClass="startHselected" labelStyleClass="startHselected">
                     <apex:outputText >Starting Hour:</apex:outputText>
-                    <apex:selectList size="1" multiselect="false" value="{!startHselected}" id="startHselected">
+                    <apex:selectList size="1" multiselect="false" value="{!config.StartingHour__c}" id="startHselected">
                         <apex:selectOptions value="{!startHours}"></apex:selectOptions>
                     </apex:selectList>
                 </apex:pageBlockSectionItem>
                 <apex:pageBlockSectionItem dataStyleClass="endHselected" labelStyleClass="endHselected">                    
                     <apex:outputText >Ending Hour:</apex:outputText>
-                    <apex:selectList size="1" multiselect="false" value="{!endHselected}" id="endHselected">
+                    <apex:selectList size="1" multiselect="false" value="{!config.EndingHour__c}" id="endHselected">
                         <apex:selectOptions value="{!endHours}"></apex:selectOptions>
                     </apex:selectList>
                 </apex:pageBlockSectionItem>
-                
+            </apex:pageBlockSection>            
+            <apex:pageBlockSection >
                 <apex:pageBlockSectionItem id="confirmConfig">
-                    <apex:commandButton value="Add" action="{!addToSummary}" reRender="Summary,pageMessage" oncomplete="j$('[id*=weekdaySelected]').change();j$('[id*=dateSelected]').change();return false;"/>
+                    
+					<apex:commandButton value="Add" reRender="Summary,pageMessage" action="{!addToSummary}" oncomplete="j$('[id*=weekdaySelected]').change();j$('[id*=dateSelected]').change();return false;"/>                    
+					                    
                 </apex:pageBlockSectionItem>                
-            </apex:pageBlockSection>  
-            
+            </apex:pageBlockSection>              
             <apex:pageBlockSection title="Summary:" collapsible="false" columns="1" id="Summary" >
                 <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Weekday configuration:</apex:outputLabel>
                     <apex:pageBlockTable var="con" value="{!configWeekDay}" columnClasses="summaryColumn" rowClasses="summaryRow">
                         <apex:column value="{!con.Weekday__c}"/>
-                        <apex:column value="{!con.StartingHour__c}"/>
-                        <apex:column value="{!con.EndingHour__c}"/>    
+                        <apex:column headerValue="Starting Hour">
+                        	<c:myHours myValue="{!con.StartingHour__c}"/>                        
+                        </apex:column>
+                        <apex:column headerValue="Ending Hour">
+                        	<c:myHours myValue="{!con.EndingHour__c}"/>                        
+                        </apex:column>                            
                         <apex:column headerValue="Action">
-                            <apex:commandLink value="Delete" action="{!removeRow}" reRender="Summary">
-                                <apex:param assignTo="{!rowWeekDay}" value="{!con.Weekday__c}" name="rowWeekDay"/>
-                                <apex:param assignTo="{!rowStartH}" value="{!con.StartingHour__c}" name="rowStartH"/>
-                                <apex:param assignTo="{!rowEndH}" value="{!con.EndingHour__c}" name="rowEndH"/>    
-                                <apex:param assignTo="{!rowDate}" value="{!TEXT(con.Date__c)}" name="rowDate"/>
+                            <apex:commandLink value="Delete" action="{!removeRow}" reRender="Summary,pageMessage">
+                                <apex:param assignTo="{!rowId}" value="{!con.Id}" name="rowId"/>                                
                             </apex:commandLink>
                         </apex:column>
                     </apex:pageBlockTable>
                 </apex:pageBlockSectionItem>
                 <apex:pageBlockSectionItem >
-                    <apex:pageBlockTable var="con2" value="{!configDate}" columnClasses="summaryColumn" rowClasses="summaryRow">
+                    <apex:outputLabel >Specific date configuration:</apex:outputLabel>
+                    <apex:pageBlockTable var="con2" value="{!configDate}">
                         <apex:column value="{!con2.Date__c}"/>
-                        <apex:column value="{!con2.StartingHour__c}"/>
-                        <apex:column value="{!con2.EndingHour__c}"/>                        
+                        <apex:column headerValue="Starting Hour">
+                        	<c:myHours myValue="{!con2.StartingHour__c}"/>                        
+                        </apex:column>
+                        <apex:column headerValue="Ending Hour">
+                        	<c:myHours myValue="{!con2.EndingHour__c}"/>                        
+                        </apex:column>                                                                       
                         <apex:column headerValue="Action">
-                            <apex:commandLink value="Delete" action="{!removeRow}" reRender="Summary">
-                                <apex:param assignTo="{!rowDate}" value="{!TEXT(con2.Date__c)}" name="rowDate"/>
-                                <apex:param assignTo="{!rowStartH}" value="{!con2.StartingHour__c}" name="rowStartH"/>
-                                <apex:param assignTo="{!rowEndH}" value="{!con2.EndingHour__c}" name="rowEndH"/>     
-                                <apex:param assignTo="{!rowWeekDay}" value="{!con2.Weekday__c}" name="rowWeekDay"/>
+                            <apex:commandLink value="Delete" action="{!removeRow}" reRender="Summary,pageMessage">
+                                <apex:param assignTo="{!rowId}" value="{!con2.Id}" name="rowId"/>                                
                             </apex:commandLink>
                         </apex:column>                        
                     </apex:pageBlockTable>
                 </apex:pageBlockSectionItem>
-            </apex:pageBlockSection>
-        
+            </apex:pageBlockSection>        
     	</apex:pageBlock>
     </apex:form>	
 </apex:page>

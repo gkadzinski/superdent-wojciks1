@@ -1,18 +1,22 @@
 public class DEN_ConfigController {	        
-    public String configType {get;set;}    
-    public String weekdaySelected {get;set;}        
-    public String startHselected {get;set;}           
-    public String endHselected {get;set;}    
-    public Date dateSelected {get;set;}  
-    public List<SelectOption> weekdays {get;set;}
+    public String configType {get;set;}      
+    public Id rowId {get;set;}    
     public List<SelectOption> startHours {get;set;}
     public List<SelectOption> endHours {get;set;}
-    public Id dentistId = UserInfo.getUserId();    
+    public Id dentistId = UserInfo.getUserId();      
+    public DEN_Config__c config {get;set;}
     private static final String configTypeWeekday = 'WDAY';
-    private static final String configTypeDate = 'DAY';                       
-    private Set<DEN_Config__c> configAdded = new Set<DEN_Config__c>();
-    private Set<DEN_Config__c> configRemoved = new Set<DEN_Config__c>();
-    private List<DEN_Config__c> configSummary {get;set;}
+    private static final String configTypeDate = 'DAY';                           
+    private List<DEN_Config__c> configSummary {
+        get {
+        	List<DEN_Config__c> configList = [SELECT Id,Name,Weekday__c,StartingHour__c,EndingHour__c,Dentist__c,Date__c                                               
+                         					FROM DEN_Config__c 
+                         					WHERE Dentist__c=:dentistId
+                         					ORDER BY Weekday__c,Date__c,StartingHour__c];            
+            return configList;
+    	}
+        set;
+    }    
     
     public List<SelectOption> getConfigTypeItems() {
         List<SelectOption> configOptions = new List<SelectOption>();
@@ -22,24 +26,49 @@ public class DEN_ConfigController {
     }
     
     public DEN_ConfigController() {                  
-        configType=configTypeWeekday;
-        weekdays=populatePickList(DEN_Config__c.Weekday__c);
-        startHours=populatePickList(DEN_Config__c.StartingHour__c);
-        endHours=populatePickList(DEN_Config__c.EndingHour__c);
-        configSummary = [SELECT Id,Name,Weekday__c,StartingHour__c,EndingHour__c,Dentist__c,Date__c                                               
-                         FROM DEN_Config__c 
-                         WHERE Dentist__c=:dentistId
-                         ORDER BY Weekday__c,Date__c,StartingHour__c];
+        configType=configTypeWeekday;        
+        startHours=populateHourPicklist(DEN_Config__c.StartingHour__c);
+        endHours=populateHourPicklist(DEN_Config__c.EndingHour__c);    
+        config = new DEN_Config__c();         
     }                
     
-    private List<SelectOption> populatePicklist(Schema.SObjectField field) {
-        List<SelectOption> result = new List<SelectOption>();
-        for (Schema.PicklistEntry value: field.getDescribe().getPicklistValues()) {
-            result.add(new SelectOption(value.getValue(),value.getLabel()));
+    private static String convertToString(Decimal decimalHourValue) {
+        Integer hourValue = Integer.valueOf(decimalHourValue);
+        String minutesResult;
+        String hoursResult;
+        Integer minutes = math.mod(hourValue,60);
+        Integer hours = hourValue/60;        
+        if (minutes<10) {
+            minutesResult = '0'+String.valueOf(minutes);
+        } else {
+            minutesResult = String.valueOf(minutes);
         }
+        if (hours<10) {
+            hoursResult = '0'+String.valueOf(hours);
+        } else {
+            hoursResult = String.valueOf(hours);
+        }
+        String result = hoursResult + ':' + minutesResult;  
         return result;
     }
-        
+    
+    private List<SelectOption> populateHourPicklist(Schema.SObjectField field) {
+        List<SelectOption> result = new List<SelectOption>();
+        //24 hours required
+        for (integer i=0;i<=24;i++) {
+            String label=i+':00';
+            String value=String.valueOf(i*60);
+            result.add(new SelectOption(value,label));
+        }
+        if (field==DEN_Config__c.StartingHour__c) {
+            result.remove(24);
+        }
+        if (field==DEN_Config__c.EndingHour__c) {
+            result.remove(0);
+        }
+        return result;
+    }                
+    
     public List<DEN_Config__c> getConfigWeekDay() {
         return populateSummary(configTypeWeekday);
     }        
@@ -50,92 +79,52 @@ public class DEN_ConfigController {
         
     private List<DEN_Config__c> populateSummary(String type) {        
         List<DEN_Config__c> configResult = new List<DEN_Config__c>();
-        for (DEN_Config__c config: configSummary) {
-            if (configTypeWeekday.equals(type) && config.Weekday__c != null) {
-                configResult.add(config);
+        for (DEN_Config__c configItem: configSummary) {
+            if (configTypeWeekday.equals(type) && configItem.Weekday__c != null) {
+                configResult.add(configItem);
             }
-            if (configTypeDate.equals(type) && config.Date__c != null) {
-                configResult.add(config);
+            if (configTypeDate.equals(type) && configItem.Date__c != null) {
+                configResult.add(configItem);
             }            
         }    
         return configResult;
     }
         
-    public PageReference addToSummary() {         
-        if (configTypeDate.equals(configType) && dateSelected==null) {            
+    public PageReference addToSummary() {  
+        system.debug('configbefore: '+config);
+        if (configTypeDate.equals(configType) && config.Date__c==null) {            
             ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO,'Please specify date in \'Select Date\' field'));                        
-        } if (configTypeWeekday.equals(configType) && String.isBlank(weekdaySelected)) {
+        } else if (configTypeWeekday.equals(configType) && String.isBlank(config.Weekday__c)) {
             ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO,'Please specify Weekday field'));                        
-        } if (String.isBlank(startHselected) || String.isBlank(endHselected)) {
+        } else if (config.StartingHour__c==null || config.EndingHour__c==null) {
             ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO,'Please specify Starting/Ending hours'));                        
-        } else {                         
-	        if (configTypeWeekday.equals(configType)) dateSelected = null;
-    	    if (configTypeDate.equals(configType)) weekdaySelected = null;
-            DEN_Config__c config = new DEN_Config__c(Weekday__c=weekdaySelected,
-                   	    	                StartingHour__c=startHselected,
-                    	                    EndingHour__c=endHselected,
-                            	            Dentist__c=dentistId,
-                                	        Date__c=dateSelected);
-    		configSummary.add(config);                          
-            configAdded.add(config);
-        }              
-        return null;
-    }        
-     
-    public PageReference cancel() {
-        return ApexPages.currentPage().setRedirect(true);                
-    }
-    
-    public PageReference save() {
-        Savepoint sp = Database.setSavepoint();
-        try {
-            insert (new List<DEN_Config__c>(configAdded));
-            try {
-                delete (new List<DEN_Config__c>(configRemoved));
-                ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO,'Config SAVED successfully'));            
-            }
-            catch (Exception e) {
-                ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR,'Error: '+e));                
-                Database.rollback(sp);
-                ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.WARNING,'Changes reverted'));            
-            }            
-        }
-        catch (Exception e) {
-            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR,'Error: '+e));
+        } else {               
+	        if (configTypeWeekday.equals(configType)) config.Date__c = null;
+    	    if (configTypeDate.equals(configType)) config.Weekday__c = null;                        
+            config.Dentist__c=dentistId;            
+            system.debug('configafter: '+config);            
+            try {                
+                insert config;                
+                ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.CONFIRM,'Record added'));                
+                config = new DEN_Config__c();
+            } catch (Exception e) {
+                ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR,'Insertion Error: '+e));
+            }    		
         }        
-        configAdded.clear();
-        configRemoved.clear();
         return null;
-    }
-    
-    public String rowWeekDay {get;set;}
-    public String rowStartH {get;set;}
-    public String rowEndH {get;set;}
-    public String rowDate {get;set;}
-    
-    private Date stringToDate(String s) {
-        if (String.isNotBlank(s)) {
-            Integer y = Integer.valueOf(s.substring(0,4));
-            Integer m = Integer.valueOf(s.substring(5, 7));
-            Integer d = Integer.valueOf(s.substring(8, 10));                    
-            return date.newInstance(y, m, d);            
-        } else return null;
-    }        
-    
-    public PageReference removeRow() {                
-        Integer idx=0;                
-        for (DEN_Config__c config: configSummary) {                       
-            if (String.isBlank(rowWeekDay) && config.StartingHour__c==rowStartH && config.EndingHour__c==rowEndH && config.Date__c==stringToDate(rowDate)) {
-                configSummary.remove(idx);
-                configRemoved.add(config);
-                break;
-            }
-            if (String.isBlank(rowDate) && config.StartingHour__c==rowStartH && config.EndingHour__c==rowEndH && config.Weekday__c==rowWeekDay) {
-                configSummary.remove(idx);
-                configRemoved.add(config);
-                break;
-            }
-            idx++;
+    }                     
+                        
+    public PageReference removeRow() {       
+        for (DEN_Config__c configItem: configSummary) {            
+            if (rowId.equals(configItem.Id)) {
+                try {                    
+                	delete configItem;    
+                    ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.CONFIRM,'Record removed'));                      
+                } catch (Exception e) {
+                    ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR,'Deletion Error: '+e));
+                }
+			break;                
+            }                
         }        
         return null;
     }
