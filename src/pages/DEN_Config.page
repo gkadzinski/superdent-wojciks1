@@ -40,10 +40,20 @@
                 });                
             }      
             
-            function highlightOverlapped() {  
-                j$('[class*=summaryRow]').each(function() {                    
-                });                                                                           
-            }
+            function highlightOverlapped() {                  
+                j$('[class*=summaryRow]').filter(':first').each(function() {
+                    var value=j$(this).find('[class*=summaryColumn]').eq(0).text();                    
+                    var start=j$(this).find('[class*=summaryColumn]').eq(1).text();
+                    var end=j$(this).find('[class*=summaryColumn]').eq(2).text();                      
+                    j$('[class*=summaryRow]:contains("'+value+'")').not(this).each(function() {
+                        var start2=j$(this).find('[class*=summaryColumn]').eq(1).text();
+                        var end2=j$(this).find('[class*=summaryColumn]').eq(2).text();                      
+                        if (true) {
+                        	j$(this).css({"background-color":"yellow"});                         
+                        }                       
+                    });                    
+                });
+            }                           			
             
             function hideBetween(field, start, end) {                
                 field.find('option').each(function() {                                       
