@@ -1,22 +1,28 @@
-<apex:page docType="html-5.0" sidebar="false" tabStyle="DEN_Config__c" controller="DEN_ConfigController">
+<apex:page sidebar="false" tabStyle="DEN_Config__c" controller="DEN_ConfigController">
     <apex:includeScript value="https://code.jquery.com/jquery-1.12.3.min.js"/>
-    <script type="text/javascript">
-    	j$ = jQuery.noConflict();
-    	j$(document).ready(function() {
+    <apex:form >        
+        <script type="text/javascript">
+        j$ = jQuery.noConflict();                
+        var starthsection;
+        var endhsection;
+        var starth;
+        var endh;
+        var weekday;
+        var day;
+        j$(document).ready(function() {
             var datePicklist = j$('[class*=dateSelected]');
             var weekdayPicklist = j$('[class*=weekdaySelected]');
-            var endhsection = j$('[class*=endHselected]');
-            var starthsection = j$('[class*=startHselected]');
-            var starth = j$('[id*=startHselected]');
-            var endh = j$('[id*=endHselected]');
-            var weekday = j$('[id*=weekdaySelected]');
-            var day = j$('[id*=dateSelected]');            
+            endhsection = j$('[class*=endHselected]');
+            starthsection = j$('[class*=startHselected]');
+            starth = j$('[id*=startHselected]');
+            endh = j$('[id*=endHselected]');
+            weekday = j$('[id*=weekdaySelected]');
+            day = j$('[id*=dateSelected]');            
             clearvalue(weekday);
             datePicklist.hide();  	
             endhsection.hide();
-            starthsection.hide();  
-            highlightOverlapped();                       
-            
+            starthsection.hide();   
+                        
             function highlightOverlapped() {                                  
                 var overlap = new Boolean();
                 j$('[class*=summaryRow]').each(function() {
@@ -29,69 +35,81 @@
                         var endToCompare=convertHourToInteger(j$(this).find('[class*=summaryColumn]').eq(2).text());                                              
                         if ( (end>startToCompare && start<startToCompare) || (start<endToCompare && end>endToCompare) ) {
                             overlap = true;
-                        	j$(this).css({"background-color":"yellow"});                         
+                            j$(this).css({"background-color":"yellow"});                         
                         }                       
                     });
-					if (overlap) {
+                    if (overlap) {
                         j$(this).css({"background-color":"yellow"});                         
                     }                    
                 });
-            }       
+            }                                                                           
+                                           
+            j$('input:radio[name$=configType]').change(function() {                                
+                datePicklist.toggle();
+                weekdayPicklist.toggle();
+            });                                                                                   
             
-            function convertHourToInteger(stringValue) {
-                var hour=+stringValue.substr(0,2);
-                var minutes=+stringValue.substr(3,4);                
-                return (60*hour+minutes);
-            }
-            
-            function hideBetween(field, start, end) {                
-                field.find('option').each(function() {                                       
-                    if(+j$(this).val() >= +start && +j$(this).val() <= +end) {
-                        j$(this).hide();
-                    }
-                });				
-            }
-            
-            function showAll(field) {
-                field.find('option').each(function() {
-                    j$(this).show();
-                });
-            }                                        
+            starth.change(function() {                
+                showAll(endh);
+                endhsection.show();                                                
+                endh.val(+starth.val()+60); 
+                hideBetween(endh,0,+starth.val());                            
+            });
             
             weekday.change(function() {                
                 showAll(starth);                
                 starthsection.show();
-				clearvalue(starth);                            
+                clearvalue(starth);                            
                 endhsection.hide();
             });
             
             day.change(function() {
-				showAll(starth);                
+                showAll(starth);                
                 starthsection.show();
-				clearvalue(starth);                                                        
+                clearvalue(starth);                                                        
                 endhsection.hide();                
-            });                        
-            
-            j$('input:radio[name$=configType]').change(function() {                                
-                datePicklist.toggle();
-                weekdayPicklist.toggle();
+            }); 
+        });        
+        
+        function verifyOverlap() {               
+            j$('[class*=summaryRow]').each(function() {                
+                var value=j$(this).find('[class*=summaryColumn]').eq(0).text();
+                var start=convertHourToInteger(j$(this).find('[class*=summaryColumn]').eq(1).text());
+                var end=convertHourToInteger(j$(this).find('[class*=summaryColumn]').eq(2).text());
+                if (value==day.val() || value==weekday.val()) {
+                    if ((endh.val()>start && starth.val()<start) || (starth.val()<end && endh.val()>end) || (starth.val()>start && endh.val()<end)) {
+                        alert('overlap exists');
+                        return false;
+                    }
+                }
+            });			          
+        }      
+        
+        function convertHourToInteger(stringValue) {
+            var hour=+stringValue.substr(0,2);
+            var minutes=+stringValue.substr(3,4);                
+            return (60*hour+minutes);
+        }        
+        
+        function clearvalue(field) {                
+            field.val('');
+        }      
+        
+        function showAll(field) {
+            field.find('option').each(function() {
+                j$(this).show();
             });
-            
-            starth.change(function() {                
-                showAll(endh);
-            	endhsection.show();                                                
-				endh.val(+starth.val()+60); 
-                hideBetween(endh,0,+starth.val());                            
-            });                                    
-
-            function clearvalue(field) {                
-                field.val('');
-            }  
-            
-		});
-    </script>
-    
-    <apex:form >
+        }          
+        
+        function hideBetween(field, start, end) {                
+            field.find('option').each(function() {                                       
+                if(+j$(this).val() >= +start && +j$(this).val() <= +end) {
+                    j$(this).hide();
+                }
+            });				
+        }    
+        
+        </script>      
         <apex:pageMessages id="pageMessage"/>        
         <apex:pageBlock title="Working hours configuration for {!$User.FirstName} {!$User.LastName}">            
             <apex:pageBlockSection title="Please adjust your setup:" collapsible="false" columns="1" >
@@ -126,10 +144,8 @@
                 </apex:pageBlockSectionItem>
             </apex:pageBlockSection>            
             <apex:pageBlockSection >
-                <apex:pageBlockSectionItem id="confirmConfig">
-                    
-					<apex:commandButton value="Add" reRender="Summary,pageMessage" action="{!addToSummary}" oncomplete="j$('[id*=weekdaySelected]').change();j$('[id*=dateSelected]').change();highlightOverlapped();return false;"/>                    
-					                    
+                <apex:pageBlockSectionItem id="confirmConfig">                    
+                    <apex:commandButton value="Add" reRender="Summary,pageMessage" action="{!addToSummary}" onclick="verifyOverlap();" oncomplete="weekday.change();day.change();"/>                    
                 </apex:pageBlockSectionItem>                
             </apex:pageBlockSection>              
             <apex:pageBlockSection title="Summary:" collapsible="false" columns="1" id="Summary" >
@@ -144,7 +160,7 @@
                         	<c:myHours myValue="{!con.EndingHour__c}"/>                        
                         </apex:column>                            
                         <apex:column headerValue="Action">
-                            <apex:commandLink value="Delete" action="{!removeRow}" reRender="Summary,pageMessage" oncomplete="highlightOverlapped();return false;">
+                            <apex:commandLink value="Delete" action="{!removeRow}" reRender="Summary,pageMessage">
                                 <apex:param assignTo="{!rowId}" value="{!con.Id}" name="rowId"/>                                
                             </apex:commandLink>
                         </apex:column>
@@ -161,7 +177,7 @@
                         	<c:myHours myValue="{!con2.EndingHour__c}"/>                        
                         </apex:column>                                                                       
                         <apex:column headerValue="Action">
-                            <apex:commandLink value="Delete" action="{!removeRow}" reRender="Summary,pageMessage" oncomplete="highlightOverlapped();return false;">
+                            <apex:commandLink value="Delete" action="{!removeRow}" reRender="Summary,pageMessage">
                                 <apex:param assignTo="{!rowId}" value="{!con2.Id}" name="rowId"/>                                
                             </apex:commandLink>
                         </apex:column>                        
