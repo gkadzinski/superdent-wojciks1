@@ -2,13 +2,17 @@ public class DEN_HoursConverterController {
     public Integer integerValue {get;set;}
     
     public String getStringValue() {
-        String hours = String.valueOf(integerValue/60);
-        String minutes = String.valueOf(Math.mod(integerValue, 60));
-        
-        return addLeadingZeros(hours) + ':' + addLeadingZeros(minutes);        
+    	return getStringValue(integerValue);
     }
     
-    private String addLeadingZeros(String str){
+    public static String getStringValue(Integer intVal) {
+    	String hours = String.valueOf(intVal/60);
+        String minutes = String.valueOf(Math.mod(intVal, 60));
+        
+        return addLeadingZeros(hours) + ':' + addLeadingZeros(minutes);  
+    }
+    
+    public static String addLeadingZeros(String str){
     	return str.leftPad(2).replace(' ', '0');
     }
 }

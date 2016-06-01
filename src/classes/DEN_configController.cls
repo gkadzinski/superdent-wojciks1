@@ -35,9 +35,10 @@ public class DEN_ConfigController {
     private List<SelectOption> populateHourPicklist(Schema.SObjectField field) {
         List<SelectOption> result = new List<SelectOption>();
         for (Integer i=0; i<=24; i++) {
-            String label = i+':00';
-            String value = String.valueOf(i*60);
-            result.add(new SelectOption(value,label));
+        	Integer minutes = i*60;
+            String label = DEN_HoursConverterController.getStringValue(minutes);
+            String value = String.valueOf(minutes);
+            result.add(new SelectOption(value, label));
         }
         if (DEN_Config__c.StartingHour__c == field) {
             result.remove(result.size()-1);
