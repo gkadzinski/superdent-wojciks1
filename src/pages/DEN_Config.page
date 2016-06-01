@@ -8,7 +8,7 @@
         var starth;
         var endh;
         var weekday;
-        var day;
+        var day;        
         j$(document).ready(function() {
             var datePicklist = j$('[class*=dateSelected]');
             var weekdayPicklist = j$('[class*=weekdaySelected]');
@@ -71,18 +71,25 @@
             }); 
         });        
         
-        function verifyOverlap() {               
-            j$('[class*=summaryRow]').each(function() {                
+        function verifyOverlap() {
+			var overlap = new Boolean();            
+            j$('[class*=summaryRow]').each(function() {                                
+                overlap = false;
                 var value=j$(this).find('[class*=summaryColumn]').eq(0).text();
                 var start=convertHourToInteger(j$(this).find('[class*=summaryColumn]').eq(1).text());
                 var end=convertHourToInteger(j$(this).find('[class*=summaryColumn]').eq(2).text());
                 if (value==day.val() || value==weekday.val()) {
                     if ((endh.val()>start && starth.val()<start) || (starth.val()<end && endh.val()>end) || (starth.val()>start && endh.val()<end)) {
-                        alert('overlap exists');
+                        alert('overlap detected');                        
+                        overlap=true;
                         return false;
                     }
                 }
-            });			          
+            });
+            if (!overlap) {
+            	postValidation();    
+            }
+            
         }      
         
         function convertHourToInteger(stringValue) {
@@ -145,7 +152,8 @@
             </apex:pageBlockSection>            
             <apex:pageBlockSection >
                 <apex:pageBlockSectionItem id="confirmConfig">                    
-                    <apex:commandButton value="Add" reRender="Summary,pageMessage" action="{!addToSummary}" onclick="verifyOverlap();" oncomplete="weekday.change();day.change();"/>                    
+                    <apex:commandButton value="Add" onclick="verifyOverlap();" oncomplete="weekday.change();day.change();"/> 
+                    <apex:actionFunction action="{!addToSummary}" name="postValidation" reRender="Summary,pageMessage"/>
                 </apex:pageBlockSectionItem>                
             </apex:pageBlockSection>              
             <apex:pageBlockSection title="Summary:" collapsible="false" columns="1" id="Summary" >
