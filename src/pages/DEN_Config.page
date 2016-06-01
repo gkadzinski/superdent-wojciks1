@@ -47,6 +47,8 @@
             j$('input:radio[name$=configType]').change(function() {                                
                 datePicklist.toggle();
                 weekdayPicklist.toggle();
+                clearvalue(weekday);
+                clearvalue(day);
             });                                                                                   
             
             starth.change(function() {                
