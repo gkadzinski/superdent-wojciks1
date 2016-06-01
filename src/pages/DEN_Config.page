@@ -18,15 +18,14 @@
             endh = j$('[id*=endHselected]');
             weekday = j$('[id*=weekdaySelected]');
             day = j$('[id*=dateSelected]');            
-            clearvalue(weekday);
+            clearValue(weekday);
             datePicklist.hide();  	
             endhsection.hide();
             starthsection.hide();   
                         
             function highlightOverlapped() {                                  
-                var overlap = new Boolean();
+                var overlap=false;
                 j$('[class*=summaryRow]').each(function() {
-                    overlap=false;
                     var value=j$(this).find('[class*=summaryColumn]').eq(0).text();                    
                     var start=convertHourToInteger(j$(this).find('[class*=summaryColumn]').eq(1).text());                                        
                     var end=convertHourToInteger(j$(this).find('[class*=summaryColumn]').eq(2).text());                      
@@ -47,8 +46,8 @@
             j$('input:radio[name$=configType]').change(function() {                                
                 datePicklist.toggle();
                 weekdayPicklist.toggle();
-                clearvalue(weekday);
-                clearvalue(day);
+                clearValue(weekday);
+                clearValue(day);
             });                                                                                   
             
             starth.change(function() {                
@@ -61,25 +60,24 @@
             weekday.change(function() {                
                 showAll(starth);                
                 starthsection.show();
-                clearvalue(starth);                            
+                clearValue(starth);                            
                 endhsection.hide();
             });
             
             day.change(function() {
                 showAll(starth);                
                 starthsection.show();
-                clearvalue(starth);                                                        
+                clearValue(starth);                                                        
                 endhsection.hide();                
             }); 
         });        
         
         function verifyOverlap() {
-			var overlap = new Boolean();            
-            j$('[class*=summaryRow]').each(function() {                                
-                overlap = false;
-                var value=j$(this).find('[class*=summaryColumn]').eq(0).text();
-                var start=convertHourToInteger(j$(this).find('[class*=summaryColumn]').eq(1).text());
-                var end=convertHourToInteger(j$(this).find('[class*=summaryColumn]').eq(2).text());
+			var overlap = false;            
+            j$('[class*=summaryRow]').each(function() {
+                var value = j$(this).find('[class*=summaryColumn]').eq(0).text();
+                var start = convertHourToInteger(j$(this).find('[class*=summaryColumn]').eq(1).text());
+                var end = convertHourToInteger(j$(this).find('[class*=summaryColumn]').eq(2).text());
                 if (value==day.val() || value==weekday.val()) {
                     if ((endh.val()>start && starth.val()<start) || (starth.val()<end && endh.val()>end) || (starth.val()>start && endh.val()<end)) {
                         alert('overlap detected');                        
@@ -89,18 +87,19 @@
                 }
             });
             if (!overlap) {
-            	postValidation();    
+            	postValidation();
             }
             
         }      
         
-        function convertHourToInteger(stringValue) {
-            var hour=+stringValue.substr(0,2);
-            var minutes=+stringValue.substr(3,4);                
-            return (60*hour+minutes);
+        function convertHourToInteger(str) {
+        	var strSpl = str.split(':');
+            var hour = +strSpl[0];
+            var minutes = +strSpl[1];
+            return (60*hour + minutes);
         }        
         
-        function clearvalue(field) {                
+        function clearValue(field) {                
             field.val('');
         }      
         
@@ -108,7 +107,7 @@
             field.find('option').each(function() {
                 j$(this).show();
             });
-        }          
+        }
         
         function hideBetween(field, start, end) {                
             field.find('option').each(function() {                                       
