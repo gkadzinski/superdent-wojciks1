@@ -1,0 +1,188 @@
+<apex:page sidebar="false" tabStyle="DEN_Config__c" controller="DEN_ConfigController">
+    <apex:includeScript value="https://code.jquery.com/jquery-1.12.3.min.js"/>
+    <apex:form >
+        <script type="text/javascript">
+        j$ = jQuery.noConflict();                
+        var startingHourSection;
+        var endingHourSection;
+        var startingHourField;
+        var endingHourField;
+        var weekDay;
+        var day;
+        j$(document).ready(function() {
+            var datePicklist = j$('[class*=dateSelected]');
+            var weekdayPicklist = j$('[class*=weekdaySelected]');
+            endingHourSection = j$('[class*=endingHour]');
+            endingHourField = j$('[id*=endingHour]');
+            startingHourSection = j$('[class*=startingHour]');
+            startingHourField = j$('[id*=startingHour]');
+            weekDay = j$('[id*=weekdaySelected]');
+            day = j$('[id*=dateSelected]');
+            clearConfigValues();
+            hideHourSections();
+            datePicklist.hide();
+
+            j$('input:radio[name$=configType]').change(function() {
+                datePicklist.toggle();
+                weekdayPicklist.toggle();
+                clearConfigValues();
+				hideHourSections();
+            });
+            
+            startingHourField.change(function() {
+                unhideAllOptions(endingHourField);
+                endingHourSection.show();
+                endingHourField.val(+startingHourField.val() + 60);
+                hideOptionsBetween(endingHourField, 0, +startingHourField.val());
+            });
+
+            weekDay.change(configValueChange);
+            day.change(configValueChange);
+        });
+        
+        function clearConfigValues() {
+            clearValue(weekDay);
+            clearValue(day);
+        }
+        
+        function hideHourSections() {
+            startingHourSection.hide();
+            endingHourSection.hide();
+        }
+        
+        function configValueChange() {
+            unhideAllOptions(startingHourField);
+            startingHourSection.show();
+            clearValue(startingHourField);
+            endingHourSection.hide();
+        }
+        
+        function verifyOverlap() {
+			var overlap = false;
+            j$('[class*=summaryRow]').each(function() {                
+                var configValue = j$(this).find('[class*=summaryColumn]').eq(0).text();
+                var startTime = convertHourToInteger(j$(this).find('[class*=summaryColumn]').eq(1).text());
+                var endTime = convertHourToInteger(j$(this).find('[class*=summaryColumn]').eq(2).text());
+                if (configValue == day.val() || configValue == weekDay.val()) {
+                    if ((startingHourField.val() < startTime && endingHourField.val() > startTime) ||
+                        (startingHourField.val() < endTime && endingHourField.val() > endTime) || 
+                        (startingHourField.val() > startTime && endingHourField.val() < endTime)) {
+                        alert('overlap detected');
+                        overlap = true;
+                        return false;
+                    }
+                }
+            });
+            if (overlap == false) {
+            	postValidation();
+            }
+        }
+        
+        function convertHourToInteger(str) {
+            var strSpl = str.split(':');
+            var hour = +strSpl[0];
+            var minutes = +strSpl[1];
+            return (60*hour + minutes);
+        }
+        
+        function clearValue(fieldVariable) {
+            fieldVariable.val('');
+        }
+        
+        function unhideAllOptions(field) {
+            field.find('option').each(function() {
+                j$(this).show();
+            });
+        }
+        
+        function hideOptionsBetween(field, hideAfter, hideBefore) {
+            field.find('option').each(function() {
+                if(+j$(this).val() >= +hideAfter && +j$(this).val() <= +hideBefore) {
+                    j$(this).hide();
+                }
+            });
+        }
+        
+        function afterVerification() {
+            weekDay.change();
+            day.change();
+        }
+        </script>      
+        <apex:pageMessages id="pageMessage"/>        
+        <apex:pageBlock title="Working hours configuration for {!$User.FirstName} {!$User.LastName}">            
+            <apex:pageBlockSection title="Please adjust your setup:" collapsible="false" columns="1" >
+                <apex:pageBlockSectionItem > 
+                    <apex:selectRadio value="{!configType}" id="configType">
+                        <apex:selectOptions value="{!configTypeItems}"/>
+                	</apex:selectRadio>
+                </apex:pageBlockSectionItem>
+			</apex:pageBlockSection>
+            <apex:pageBlockSection showHeader="false" columns="1" >
+                <apex:pageBlockSectionItem dataStyleClass="weekdaySelected" labelStyleClass="weekdaySelected">
+                    <apex:outputLabel for="weekdaySelected">Select Weekday:</apex:outputLabel>
+                    <apex:inputField value="{!config.Weekday__c}" id="weekdaySelected"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem dataStyleClass="dateSelected" labelStyleClass="dateSelected"> 
+                    <apex:outputLabel for="dateSelected">Select Date:</apex:outputLabel>                    
+                    <apex:inputField value="{!config.Date__c}" id="dateSelected"/>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection showHeader="false" columns="1">
+                <apex:pageBlockSectionItem dataStyleClass="startingHour" labelStyleClass="startingHour">
+                    <apex:outputText >Starting Hour:</apex:outputText>
+                    <apex:selectList size="1" multiselect="false" value="{!config.StartingHour__c}" id="startingHour">
+                        <apex:selectOptions value="{!startHours}"/>
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem dataStyleClass="endingHour" labelStyleClass="endingHour">                    
+                    <apex:outputText >Ending Hour:</apex:outputText>
+                    <apex:selectList size="1" multiselect="false" value="{!config.EndingHour__c}" id="endingHour">
+                        <apex:selectOptions value="{!endHours}"/>
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>            
+            <apex:pageBlockSection >
+                <apex:pageBlockSectionItem >
+                    <apex:commandButton value="Add" onclick="verifyOverlap();" oncomplete="afterVerification();"/>
+                    <apex:actionFunction action="{!addToSummary}" name="postValidation" reRender="Summary,pageMessage"/>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Summary:" collapsible="false" columns="1" id="Summary" >
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Weekday configuration:</apex:outputLabel>
+                    <apex:pageBlockTable var="weekDayItem" value="{!WeekDayConfig}" columnClasses="summaryColumn" rowClasses="summaryRow">
+                        <apex:column headerValue="Weekday" value="{!weekDayItem.Weekday__c}"/>
+                        <apex:column headerValue="Starting Hour">
+                        	<c:DEN_displayConvertedHours myValue="{!weekDayItem.StartingHour__c}"/>
+                        </apex:column>
+                        <apex:column headerValue="Ending Hour">
+                        	<c:DEN_displayConvertedHours myValue="{!weekDayItem.EndingHour__c}"/>
+                        </apex:column>
+                        <apex:column headerValue="Action">
+                            <apex:commandLink value="Delete" action="{!removeRow}" reRender="Summary">
+                                <apex:param assignTo="{!rowId}" value="{!weekDayItem.Id}" name="rowId"/>
+                            </apex:commandLink>
+                        </apex:column>
+                    </apex:pageBlockTable>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Specific date configuration:</apex:outputLabel>
+                    <apex:pageBlockTable var="dateItem" value="{!SpecificDateConfig}" columnClasses="summaryColumn" rowClasses="summaryRow">
+                        <apex:column headerValue="Date" value="{!dateItem.Date__c}"/>
+                        <apex:column headerValue="Starting Hour">
+                        	<c:DEN_displayConvertedHours myValue="{!dateItem.StartingHour__c}"/>
+                        </apex:column>
+                        <apex:column headerValue="Ending Hour">
+                        	<c:DEN_displayConvertedHours myValue="{!dateItem.EndingHour__c}"/>
+                        </apex:column>
+                        <apex:column headerValue="Action">
+                            <apex:commandLink value="Delete" action="{!removeRow}" reRender="Summary">
+                                <apex:param assignTo="{!rowId}" value="{!dateItem.Id}" name="rowId"/>
+                            </apex:commandLink>
+                        </apex:column>
+                    </apex:pageBlockTable>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+    	</apex:pageBlock>
+    </apex:form>
+</apex:page>
