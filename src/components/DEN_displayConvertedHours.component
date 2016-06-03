@@ -1,4 +1,0 @@
-<apex:component controller="DEN_HoursConverterController">
-    <apex:attribute name="myValue" type="Integer" description="hour value" assignTo="{!integerValue}"/>    
-    <apex:outputText value="{!stringValue}"/>
-</apex:component>

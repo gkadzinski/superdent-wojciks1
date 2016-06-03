@@ -153,10 +153,10 @@
                     <apex:pageBlockTable var="weekDayItem" value="{!WeekDayConfig}" columnClasses="summaryColumn" rowClasses="summaryRow">
                         <apex:column headerValue="Weekday" value="{!weekDayItem.Weekday__c}"/>
                         <apex:column headerValue="Starting Hour">
-                        	<c:DEN_displayConvertedHours myValue="{!weekDayItem.StartingHour__c}"/>
+                        	<c:DEN_DisplayConvertedHours myValue="{!weekDayItem.StartingHour__c}"/>
                         </apex:column>
                         <apex:column headerValue="Ending Hour">
-                        	<c:DEN_displayConvertedHours myValue="{!weekDayItem.EndingHour__c}"/>
+                        	<c:DEN_DisplayConvertedHours myValue="{!weekDayItem.EndingHour__c}"/>
                         </apex:column>
                         <apex:column headerValue="Action">
                             <apex:commandLink value="Delete" action="{!removeRow}" reRender="Summary">
@@ -170,10 +170,10 @@
                     <apex:pageBlockTable var="dateItem" value="{!SpecificDateConfig}" columnClasses="summaryColumn" rowClasses="summaryRow">
                         <apex:column headerValue="Date" value="{!dateItem.Date__c}"/>
                         <apex:column headerValue="Starting Hour">
-                        	<c:DEN_displayConvertedHours myValue="{!dateItem.StartingHour__c}"/>
+                        	<c:DEN_DisplayConvertedHours myValue="{!dateItem.StartingHour__c}"/>
                         </apex:column>
                         <apex:column headerValue="Ending Hour">
-                        	<c:DEN_displayConvertedHours myValue="{!dateItem.EndingHour__c}"/>
+                        	<c:DEN_DisplayConvertedHours myValue="{!dateItem.EndingHour__c}"/>
                         </apex:column>
                         <apex:column headerValue="Action">
                             <apex:commandLink value="Delete" action="{!removeRow}" reRender="Summary">
