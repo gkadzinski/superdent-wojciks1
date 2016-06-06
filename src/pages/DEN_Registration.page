@@ -1,0 +1,21 @@
+<apex:page showHeader="false" standardStylesheets="true" controller="DEN_RegistrationController">
+    <apex:form >
+        <apex:pageBlock title="Welcome in Superdent Registration form.">
+            <apex:pageBlockSection collapsible="false" columns="1" title="Please select Dentist and available time for Appointment">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Filter by type:</apex:outputLabel>
+                    <apex:selectList value="{!dentistType}" size="1" multiselect="false">
+                        <apex:selectOptions value="{!dentistTypes}"/>
+                        <apex:actionSupport action="{!filterTypes}" event="onchange" reRender="dentists"/>
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:pageBlockTable value="{!dentists}" var="dentist" style="width: 25%" id="dentists">
+                        <apex:column value="{!dentist.Name}"/>
+                        <apex:column value="{!dentist.Type__c}"/>
+                    </apex:pageBlockTable>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

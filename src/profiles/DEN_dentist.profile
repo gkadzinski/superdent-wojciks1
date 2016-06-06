@@ -8,6 +8,10 @@
         <apexClass>DEN_HoursConverterController</apexClass>
         <enabled>false</enabled>
     </classAccesses>
+    <classAccesses>
+        <apexClass>DEN_RegistrationController</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
     <custom>true</custom>
     <fieldPermissions>
         <editable>true</editable>
@@ -80,6 +84,10 @@
     </layoutAssignments>
     <pageAccesses>
         <apexPage>DEN_Config</apexPage>
+        <enabled>false</enabled>
+    </pageAccesses>
+    <pageAccesses>
+        <apexPage>DEN_Registration</apexPage>
         <enabled>false</enabled>
     </pageAccesses>
     <recordTypeVisibilities>
