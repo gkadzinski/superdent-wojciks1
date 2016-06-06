@@ -107,7 +107,8 @@
             weekDay.change();
             day.change();
         }
-        </script>      
+        </script>   
+        
         <apex:pageMessages id="pageMessage"/>        
         <apex:pageBlock title="Working hours configuration for {!$User.FirstName} {!$User.LastName}">            
             <apex:pageBlockSection title="Please adjust your setup:" collapsible="false" columns="1" >
@@ -150,8 +151,8 @@
             <apex:pageBlockSection title="Summary:" collapsible="false" columns="1" id="Summary" >
                 <apex:pageBlockSectionItem >
                     <apex:outputLabel >Weekday configuration:</apex:outputLabel>
-                    <apex:pageBlockTable var="weekDayItem" value="{!WeekDayConfig}" columnClasses="summaryColumn" rowClasses="summaryRow">
-                        <apex:column headerValue="Weekday" value="{!weekDayItem.Weekday__c}"/>
+                    <apex:pageBlockTable var="weekDayItem" value="{!WeekDayConfig}" columnClasses="summaryColumn" rowClasses="summaryRow" cellspacing="5" style="width: 30%;">
+                        <apex:column headerValue="Weekday" value="{!weekDayItem.Weekday__c}" width="70"/>
                         <apex:column headerValue="Starting Hour">
                         	<c:DEN_DisplayConvertedHours myValue="{!weekDayItem.StartingHour__c}"/>
                         </apex:column>
@@ -167,8 +168,8 @@
                 </apex:pageBlockSectionItem>
                 <apex:pageBlockSectionItem >
                     <apex:outputLabel >Specific date configuration:</apex:outputLabel>
-                    <apex:pageBlockTable var="dateItem" value="{!SpecificDateConfig}" columnClasses="summaryColumn" rowClasses="summaryRow">
-                        <apex:column headerValue="Date" value="{!dateItem.Date__c}"/>
+                    <apex:pageBlockTable var="dateItem" value="{!SpecificDateConfig}" columnClasses="summaryColumn" rowClasses="summaryRow" cellspacing="5" style="width: 30%;">
+                        <apex:column headerValue="Date" value="{!dateItem.Date__c}" width="70"/>
                         <apex:column headerValue="Starting Hour">
                         	<c:DEN_DisplayConvertedHours myValue="{!dateItem.StartingHour__c}"/>
                         </apex:column>
