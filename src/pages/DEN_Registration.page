@@ -11,10 +11,13 @@
                 </apex:pageBlockSectionItem>
                 <apex:pageBlockSectionItem >
                     <apex:pageBlockTable value="{!dentists}" var="dentist" style="width: 25%" id="dentists">
-                        <apex:column value="{!dentist.Name}"/>
-                        <apex:column value="{!dentist.Type__c}"/>
+                        <apex:column headerValue="Dentist" value="{!dentist.Name}"/>
+                        <apex:column headerValue="Specialization" value="{!dentist.Type__c}"/>
                     </apex:pageBlockTable>
                 </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1">
+                  <c:DEN_CalendarMonth />
             </apex:pageBlockSection>
         </apex:pageBlock>
     </apex:form>

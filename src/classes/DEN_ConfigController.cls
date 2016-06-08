@@ -25,11 +25,11 @@ public class DEN_ConfigController {
     }
     
     public List<DEN_Config__c> getWeekDayConfig() {
-		return populateSummary(WEEKDAY);     
+        return populateSummary(WEEKDAY);     
     }
         
     public List<DEN_Config__c> getSpecificDateConfig() {
-		return populateSummary(SPECIFIC_DATE);      
+        return populateSummary(SPECIFIC_DATE);      
     }
 
     private List<SelectOption> populateHourPicklist(Schema.SObjectField field) {
@@ -50,9 +50,9 @@ public class DEN_ConfigController {
     }
     
     private List<DEN_Config__c> getAllConfigSummary() {
-		return [SELECT Id, Name, Weekday__c, StartingHour__c, EndingHour__c, Dentist__c, Date__c
-        		FROM DEN_Config__c
-        		WHERE Dentist__c =: UserInfo.getUserId()
+        return [SELECT Id, Name, Weekday__c, StartingHour__c, EndingHour__c, Dentist__c, Date__c
+                FROM DEN_Config__c
+                WHERE Dentist__c =: UserInfo.getUserId()
                 ORDER BY Weekday__c, Date__c, StartingHour__c];
     }
     
@@ -83,8 +83,8 @@ public class DEN_ConfigController {
             return null;
         }
         
-	    if (WEEKDAY.equals(configType)) config.Date__c = null;
-    	if (SPECIFIC_DATE.equals(configType)) config.Weekday__c = null;
+        if (WEEKDAY.equals(configType)) config.Date__c = null;
+        if (SPECIFIC_DATE.equals(configType)) config.Weekday__c = null;
         
         insert config;
         config = new DEN_Config__c();

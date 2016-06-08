@@ -3,6 +3,7 @@ public class DEN_RegistrationController {
     private static final String FILTERED_DENTISTS = 'SELECT Id, Name, Type__c FROM User WHERE Type__c =: dentistType';
     public String dentistType {get;set;}
     public List<User> dentistList {get;set;}
+    public Id dentistId {get;set;}    
     
     public ApexPages.StandardSetController dentistSetCon {
         get {
@@ -22,7 +23,7 @@ public class DEN_RegistrationController {
         else {
             dentistSetCon = new ApexPages.StandardSetController(Database.getQueryLocator(ALL_DENTISTS));
         }
-        getDentists();
+        getDentists();        
         return null;
     }
     
