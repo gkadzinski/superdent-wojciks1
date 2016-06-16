@@ -2,11 +2,11 @@ public class DEN_ConfigController {
     private static final String WEEKDAY = 'WDAY';
     private static final String SPECIFIC_DATE = 'DAY';
     
-    public DEN_Config__c config {get;set;}
-    public Id rowId {get;set;}
-    public String configType {get;set;}    
-    public List<SelectOption> startHours {get;set;}
-    public List<SelectOption> endHours {get;set;}
+    public DEN_Config__c config {get; set;}
+    public Id rowId {get; set;}
+    public String configType {get; set;}    
+    public List<SelectOption> startHours {get; set;}
+    public List<SelectOption> endHours {get; set;}
 
     public DEN_ConfigController() {
         config = new DEN_Config__c();
@@ -71,15 +71,15 @@ public class DEN_ConfigController {
 
     public PageReference addToSummary() {
         if (SPECIFIC_DATE.equals(configType) && config.Date__c == null) {
-            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO,'Please specify date in \'Select Date\' field'));
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO, 'Please specify date in \'Select Date\' field'));
             return null;
         }
         if (WEEKDAY.equals(configType) && String.isBlank(config.Weekday__c)) {
-            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO,'Please specify Weekday field'));
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO, 'Please specify Weekday field'));
             return null;
         }
         if (config.StartingHour__c == null || config.EndingHour__c == null) {
-            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO,'Please specify Starting/Ending hours'));
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO, 'Please specify Starting/Ending hours'));
             return null;
         }
         

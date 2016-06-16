@@ -1,14 +1,16 @@
 <apex:component controller="DEN_CalendarMonthController">
+    <apex:attribute name="dentist" description="to pass dentist ID to component" type="String" assignTo="{!dentistId}"/>
 	<apex:panelGrid columns="3" id="panel">
-		<apex:commandLink action="{!previousMonth}" reRender="month, panel">Previous Month</apex:commandLink>
+		<apex:commandLink action="{!previousMonth}" reRender="month, panel" oncomplete="styleCalendarDays();">Previous Month</apex:commandLink>
         <apex:outputLabel >{!actualMonthName}</apex:outputLabel>
-		<apex:commandLink action="{!nextMonth}" reRender="month, panel">Next Month</apex:commandLink>
+		<apex:commandLink action="{!nextMonth}" reRender="month, panel" oncomplete="styleCalendarDays();">Next Month</apex:commandLink>
 	</apex:panelGrid>    
 	<apex:outputPanel id="month">
 		<apex:repeat value="{!calendarDays}" var="cal">
-			<div style="width: 50px; height: 50px; border: solid 1px black; float: left;">
-				<apex:outputLabel value="{!cal.dayOfWeek}" style="font-size: 10px;"/><br/>
+			<div style="width: 65px; height: 65px; border: solid 1px black; float: left; margin: 5px 5px;">
+				<apex:outputText value="{!cal.dayOfWeek}" style="font-size: 10px;"/><br/>
 				<apex:outputText value="{!cal.day}" style="font-size: 25px;"/>
+                <apex:outputText value="{!cal.available}" id="dayAvailability"/>
 			</div>
 		</apex:repeat>
 	</apex:outputPanel>
