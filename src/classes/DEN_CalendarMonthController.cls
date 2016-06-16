@@ -29,6 +29,7 @@ public with sharing class DEN_CalendarMonthController {
     }
 
 	public List<CalendarWrapper> getCalendarDays() {
+<<<<<<< .mine
         userConfig = [SELECT Id, Name, Weekday__c, Date__c, StartingHour__c, EndingHour__c FROM DEN_Config__c WHERE Dentist__c =: dentistId];
 		List<CalendarWrapper> result = getLeadingDays(getFirstDayOfMonth());
 		for (Integer day=0; day<getDaysInMonthCount(); day++) {
@@ -44,6 +45,23 @@ public with sharing class DEN_CalendarMonthController {
             }
 			result.add(new CalendarWrapper(dayOfWeek, day +1, available));
 		}
+=======
+		List<CalendarWrapper> result = getLeadingDays(getFirstDayOfMonth());
+		for (Integer day=1; day<=getDaysInMonthCount(); day++) {
+			String dayOfWeek = DateTime.newInstance(Date.newInstance(displayedMonth.year(), displayedMonth.month(), day), Time.newInstance(0, 0, 0, 0)).format('EEE');
+			result.add(new CalendarWrapper(dayOfWeek, day));
+		}
+
+
+
+
+
+
+
+
+
+
+>>>>>>> .theirs
 		return result;
 	}
 
@@ -57,17 +75,37 @@ public with sharing class DEN_CalendarMonthController {
 		return null;
 	}
 
+<<<<<<< .mine
 	public class CalendarWrapper {
 		public String dayOfWeek {get; set;}
 		public Integer day {get; set;}
         public Boolean available {get; set;}
 		public CalendarWrapper(String dayOfWeek, Integer day, Boolean available) {
+=======
+	public class CalendarWrapper {	
+		public String dayOfWeek {get; set;}
+		public Integer day {get; set;}
+		
+		public CalendarWrapper(String dayOfWeek, Integer day) {
+>>>>>>> .theirs
 			this.dayOfWeek = dayOfWeek;
 			this.day = day;
             this.available = available;
 		}
+<<<<<<< .mine
+
+
+
+
+=======
+		
+		public CalendarWrapper(String dayOfWeek) {
+			CalendarWrapper(dayOfWeek, null);
+		}
+>>>>>>> .theirs
 	}
 
+<<<<<<< .mine
 	public List<CalendarWrapper> getLeadingDays(String dayUntil) {
         List<CalendarWrapper> retList = new List<CalendarWrapper>();
 		for (Integer i=0; i<WEEKDAYS.size(); i++) {
@@ -75,6 +113,15 @@ public with sharing class DEN_CalendarMonthController {
                 break;
             }
 			retList.add(new CalendarWrapper(WEEKDAYS[i], null, false));
+=======
+	public List<CalendarWrapper> getLeadingDays(String dayUntil) {
+		List<CalendarWrapper> retList = new List<CalendarWrapper>();
+		for (Integer i=0; i<WEEKDAYS; i++) {
+			if (WEEKDAYS[i].equals(dayUntil)){
+				break;
+			}
+			retList.add(new CalendarWrapper(WEEKDAYS[i]));
+>>>>>>> .theirs
         }
 		return retList;
 	}

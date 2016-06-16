@@ -7,7 +7,11 @@ public class DEN_RegistrationController {
     
     public ApexPages.StandardSetController dentistSetCon {
         get {
+<<<<<<< .mine
 			return dentistSetCon == null ? new ApexPages.StandardSetController(Database.getQueryLocator(ALL_DENTISTS)) : dentistSetCon;
+=======
+            return dentistSetCon == null ? new ApexPages.StandardSetController(Database.getQueryLocator(ALL_DENTISTS)) : dentistSetCon;
+>>>>>>> .theirs
         }
         set;
     }
