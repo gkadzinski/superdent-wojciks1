@@ -6,11 +6,49 @@
         var calendarPanel;
         var dentistType;
         var dayAvailability;
+        var datePicker;
+        var timePicker;
+        var timeAvailability;
+        
         j$(document).ready(function() {
             dentistType = j$('[id*=dentistType]');
             hideCalendarPanel();
             dentistType.change(hideCalendarPanel);
         });
+        
+        function showDayAvailability(day) {
+            var background;
+            j$('[id*=dayNumber]').each(function() {
+                if (j$(this).text() == day) {
+                    background = j$(this).closest("div").css("background-color");
+                }
+            });
+            if (background == 'rgb(0, 128, 0)') {
+            	datePicker = j$('[id*=datePicker]');
+            	datePicker.hide();
+            	daySelected(day);
+            	timePicker = j$('[id*=timePicker]');
+            	timePicker.show();
+            }
+            else {
+                alert('Please select available day (marked - Green)');
+            }
+        }
+        
+        function timeSelected(time) {
+            var background;
+            j$('[id*=timeSlot]').each(function() {
+                if (j$(this).text() == time) {
+                    background = j$(this).css("background-color");
+                }
+            });
+            if (background == 'rgb(0, 128, 0)') {
+                alert('..will be coded soon');
+            }
+            else {
+                alert('Please select available Time (marked - Green)');
+            }
+        }
         
         function hideCalendarPanel() {
             calendarPanel = j$('[id*=calendar]');
@@ -35,9 +73,24 @@
             });
         }
         
+        function markAvailableTime() {
+            timeAvailability = j$('[id$=timeAvailability]');
+            timeAvailability.each(function() {
+                if (j$(this).text() == 'true') {
+                    j$(this).prev().css({"background-color" : "green"});
+                }
+                else {
+                    j$(this).prev().css({"background-color" : "red"});
+                }                
+            });
+            j$('[id*=timeAvailability]').hide();
+        }
+        
 		function styleCalendarDays() {
             markAvailableDays();
-            j$('[id*=month] div:nth-child(7n+8)').css({"clear" : "both"});            
+            j$('[id*=month] div:nth-child(7n+8)').css({"clear" : "both"});
+            timePicker = j$('[id*=timePicker]');
+            timePicker.hide();
         }
         </script>
         <apex:pageBlock title="Welcome in Superdent Registration form.">

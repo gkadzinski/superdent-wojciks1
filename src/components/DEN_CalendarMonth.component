@@ -1,17 +1,33 @@
 <apex:component controller="DEN_CalendarMonthController">
-    <apex:attribute name="dentist" description="to pass dentist ID to component" type="String" assignTo="{!dentistId}"/>
-	<apex:panelGrid columns="3" id="panel">
-		<apex:commandLink action="{!previousMonth}" reRender="month, panel" oncomplete="styleCalendarDays();">Previous Month</apex:commandLink>
-        <apex:outputLabel >{!actualMonthName}</apex:outputLabel>
-		<apex:commandLink action="{!nextMonth}" reRender="month, panel" oncomplete="styleCalendarDays();">Next Month</apex:commandLink>
-	</apex:panelGrid>    
-	<apex:outputPanel id="month">
-		<apex:repeat value="{!calendarDays}" var="cal">
-			<div style="width: 65px; height: 65px; border: solid 1px black; float: left; margin: 5px 5px;">
-				<apex:outputText value="{!cal.dayOfWeek}" style="font-size: 10px;"/><br/>
-				<apex:outputText value="{!cal.day}" style="font-size: 25px;"/>
-                <apex:outputText value="{!cal.available}" id="dayAvailability"/>
-			</div>
-		</apex:repeat>
-	</apex:outputPanel>
+    <apex:attribute name="dentist" description="to pass dentist ID to component" type="String" assignTo="{!dentistId}"/>    
+    <apex:outputPanel id="datePicker">
+        <apex:panelGrid columns="3">
+            <apex:commandLink action="{!previousMonth}" reRender="datePicker" oncomplete="styleCalendarDays();">Previous Month</apex:commandLink>
+            <apex:outputLabel >{!actualMonthName}</apex:outputLabel>
+            <apex:commandLink action="{!nextMonth}" reRender="datePicker" oncomplete="styleCalendarDays();">Next Month</apex:commandLink>
+        </apex:panelGrid>
+        <apex:outputPanel id="month">
+            <apex:repeat value="{!calendarDays}" var="cal">
+                <div style="width: 65px; height: 65px; border: solid 1px black; float: left; margin: 5px 5px;" onclick="showDayAvailability('{!cal.day}');">
+                    <apex:outputText value="{!cal.dayOfWeek}" style="font-size: 10px;"/><br/>
+                    <apex:outputText value="{!cal.day}" style="font-size: 25px;" id="dayNumber"/>
+                    <apex:outputText value="{!cal.available}" id="dayAvailability"/>
+                </div>
+            </apex:repeat>
+            <apex:actionFunction name="daySelected" reRender="timePicker" oncomplete="markAvailableTime();">
+                <apex:param assignTo="{!selectedDay}" name="selectedDay" value=""/>
+            </apex:actionFunction>
+        </apex:outputPanel>
+    </apex:outputPanel>
+    <apex:outputPanel id="timePicker">
+        <apex:pageBlockSection collapsible="false" showHeader="false" columns="1">
+            <apex:pageBlockSectionItem >
+                <apex:outputLabel >Selected dentist: {!dentistName}<br/>Available time slots for date: {!selectedDay} {!actualMonthName}<br/></apex:outputLabel>
+                <apex:pageBlockTable value="{!AllTimeSlots}" var="time" style="width: 10%;" id="timeSlotTable" onclick="markAvailableTime();">
+                    <apex:column headerValue="TimeSlots" value="{!time.timePeriod}" onclick="timeSelected('{!time.timePeriod}');" id="timeSlot"/>
+                    <apex:column headerValue="Available?" value="{!time.available}" id="timeAvailability"/>
+                </apex:pageBlockTable>
+            </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>
+    </apex:outputPanel>
 </apex:component>

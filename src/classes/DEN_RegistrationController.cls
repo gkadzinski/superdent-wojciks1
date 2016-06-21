@@ -1,4 +1,4 @@
-public class DEN_RegistrationController {
+public with sharing class DEN_RegistrationController {
     private static final String ALL_DENTISTS = 'SELECT Id, Name, Type__c FROM User WHERE Type__c != null';
     private static final String FILTERED_DENTISTS = 'SELECT Id, Name, Type__c FROM User WHERE Type__c =: dentistType';
     
