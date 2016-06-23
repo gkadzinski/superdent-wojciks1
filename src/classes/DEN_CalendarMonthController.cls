@@ -1,38 +1,21 @@
 public with sharing class DEN_CalendarMonthController {
     public static final List<String> WEEKDAYS = new List<String> {'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'};
 	
-    public Date displayedMonth {get; set;}
-    public Id dentistId {get; set;}
-    public Integer selectedDay {get; set;}
     private List<DEN_Config__c> userConfig {get; set;}
+    public Id dentistId {get; set;}
+    public Date displayedMonth {get; set;}
+    public Integer selectedDay {get; set;}
+    
+    public DEN_CalendarMonthController() {
+        displayedMonth = Date.today().toStartOfMonth();
+	}
+    
     public String getDentistName() {
         return (dentistId == null ? null : [SELECT Id, Name, Username FROM User WHERE Id =: dentistId].Name);
     }
     
-    private List<Integer> getAvailableSlots() {
-        List<Integer> result = new List<Integer>();
-        if (dentistId != null && selectedDay != null) {
-            Date selDate = Date.newInstance(displayedMonth.year(), displayedMonth.month(), selectedDay);
-            String selDateWeekDay = DEN_DateUtil.getWeekdayFrom(selDate);
-            Boolean dateConfig = false;
-            for (DEN_Config__c config : userConfig) {
-                if (config.Date__c != null && config.Date__c == selDate) {
-                    dateConfig = true;
-                    result.add(Integer.valueOf(config.StartingHour__c));
-                    result.add(Integer.valueOf(config.EndingHour__c));
-                }
-            }
-            if (!dateConfig) {
-                result.clear();
-                for (DEN_Config__c config : userConfig) {
-                    if (config.Weekday__c != null && config.Weekday__c.equals(selDateWeekDay.toUpperCase())) {
-						result.add(Integer.valueOf(config.StartingHour__c));
-                        result.add(Integer.valueOf(config.EndingHour__c));
-                    }
-                }
-            }
-        }
-        return result;
+    public String getActualMonthName() {
+        return DEN_DateUtil.getActualMonthName(displayedMonth);
     }
     
     public List<TimeWrapper> getAllTimeSlots() {
@@ -56,29 +39,12 @@ public with sharing class DEN_CalendarMonthController {
         return result;
     }
     
-	public DEN_CalendarMonthController() {
-        displayedMonth = Date.today().toStartOfMonth();
-	}
-
-	public Integer getDaysInMonthCount() {
-		return Date.daysInMonth(displayedMonth.year(), displayedMonth.month());
-	}
-
-	public String getFirstDayOfMonth() {
-		return DEN_DateUtil.getWeekdayFrom(displayedMonth);
-	}
-    
-    public String getActualMonthName() {
-        return DEN_DateUtil.getDateTime(displayedMonth).format('MMM YY');
-    }
-
 	public List<CalendarWrapper> getCalendarDays() {        
         userConfig = [SELECT Id, Name, Weekday__c, Date__c, StartingHour__c, EndingHour__c FROM DEN_Config__c WHERE Dentist__c =: dentistId];
-		List<CalendarWrapper> result = getLeadingDays(getFirstDayOfMonth());
-		for (Integer day=0; day<getDaysInMonthCount(); day++) {
+		List<CalendarWrapper> result = getLeadingDays(DEN_DateUtil.getWeekdayFrom(displayedMonth));
+		for (Integer day=0; day<DEN_DateUtil.getDaysInMonthCount(displayedMonth); day++) {
             Boolean available = false;
-            Date selDate = Date.newInstance(displayedMonth.year(), displayedMonth.month(), day +1);
-			String dayOfWeek = DEN_DateUtil.getWeekdayFrom(selDate);
+			String dayOfWeek = DEN_DateUtil.getWeekdayFrom(displayedMonth, day + 1);
             if (displayedMonth.addDays(day) > Date.today()) {
                 for (DEN_Config__c config : userConfig) {
                     if ((config.Weekday__c != null && config.Weekday__c.equals(dayOfWeek.toUpperCase())) || (config.Date__c != null && config.Date__c == displayedMonth.addDays(day))) {
@@ -91,6 +57,43 @@ public with sharing class DEN_CalendarMonthController {
 		}
 		return result;
 	}
+	
+	private List<CalendarWrapper> getLeadingDays(String dayUntil) {
+        List<CalendarWrapper> retList = new List<CalendarWrapper>();
+		for (Integer i=0; i<WEEKDAYS.size(); i++) {
+            if (WEEKDAYS[i].equals(dayUntil)) {
+                break;
+            }
+			retList.add(new CalendarWrapper(WEEKDAYS[i], null, false));
+        }
+		return retList;
+	}
+	
+	private List<Integer> getAvailableSlots() {
+        List<Integer> result = new List<Integer>();
+        if (dentistId != null && selectedDay != null) {
+            Date selDate = DEN_DateUtil.getDateFrom(displayedMonth, selectedDay);
+            String selDateWeekDay = DEN_DateUtil.getWeekdayFrom(selDate);
+            Boolean dateConfig = false;
+            for (DEN_Config__c config : userConfig) {
+                if (config.Date__c != null && config.Date__c == selDate) {
+                    dateConfig = true;
+                    result.add(Integer.valueOf(config.StartingHour__c));
+                    result.add(Integer.valueOf(config.EndingHour__c));
+                }
+            }
+            if (!dateConfig) {
+                result.clear();
+                for (DEN_Config__c config : userConfig) {
+                    if (config.Weekday__c != null && config.Weekday__c.equals(selDateWeekDay.toUpperCase())) {
+						result.add(Integer.valueOf(config.StartingHour__c));
+                        result.add(Integer.valueOf(config.EndingHour__c));
+                    }
+                }
+            }
+        }
+        return result;
+    }
 
 	public PageReference nextMonth() {
         displayedMonth = displayedMonth.addMonths(1);
@@ -122,14 +125,4 @@ public with sharing class DEN_CalendarMonthController {
         }
     }
 
-	public List<CalendarWrapper> getLeadingDays(String dayUntil) {
-        List<CalendarWrapper> retList = new List<CalendarWrapper>();
-		for (Integer i=0; i<WEEKDAYS.size(); i++) {
-            if (WEEKDAYS[i].equals(dayUntil)) {
-                break;
-            }
-			retList.add(new CalendarWrapper(WEEKDAYS[i], null, false));
-        }
-		return retList;
-	}
 }

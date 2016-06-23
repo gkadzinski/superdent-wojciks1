@@ -31,48 +31,48 @@
         }
     </style>
     <script type="text/javascript">
-    var timePicker;
-    
-    j$(document).ready(function() {
-        hideTimePicker();
-    });
-    
-    function hideTimePicker() {
-        timePicker = j$('[id*=timePicker]');
-        timePicker.hide();
-    }
-    
-    function dateSelected(day) {
-        j$('[id*=dayNumber]').each(function() {
-            if (j$(this).text() == day) {
-                if (j$(this).parent().hasClass('availabletrue')) {
-                    j$('.selectedDay').removeClass('selectedDay');
-                    j$(this).parent().addClass('selectedDay');
-                    selectedDay(day);
-                    timePicker = j$('[id*=timePicker]');
-                    timePicker.show();
-                }
-                else {
-                    alert('Please select available day (marked - Green)');
-                    return false;
-                }
-            }
-        });
-    }
-    
-    function openForm(time) {
-        j$('[id*=timeSlot]').each(function() {
-            if (j$(this).text() == time) {
-                if (j$(this).hasClass('availabletrue')) {
-                    alert('otwieram formularz.... TBD');
-                }
-                else {
-                    alert('Please select available Time (marked - Green)');
-                    return false;
-                }
-            }
-        });
-    }
+	    var timePicker;
+	    
+	    j$(document).ready(function() {
+	        hideTimePicker();
+	    });
+	    
+	    function hideTimePicker() {
+	        timePicker = j$('[id*=timePicker]');
+	        timePicker.hide();
+	    }
+	    
+	    function dateSelected(day) {
+	        j$('[id*=dayNumber]').each(function() {
+	            if (j$(this).text() == day) {
+	                if (j$(this).parent().hasClass('availabletrue')) {
+	                    j$('.selectedDay').removeClass('selectedDay');
+	                    j$(this).parent().addClass('selectedDay');
+	                    selectedDay(day);
+	                    timePicker = j$('[id*=timePicker]');
+	                    timePicker.show();
+	                }
+	                else {
+	                    alert('Please select available day (marked - Green)');
+	                    return false;
+	                }
+	            }
+	        });
+	    }
+	    
+	    function openForm(time) {
+	        j$('[id*=timeSlot]').each(function() {
+	            if (j$(this).text() == time) {
+	                if (j$(this).hasClass('availabletrue')) {
+	                    alert('otwieram formularz.... TBD');
+	                }
+	                else {
+	                    alert('Please select available Time (marked - Green)');
+	                    return false;
+	                }
+	            }
+	        });
+	    }
     </script>
     <apex:attribute name="dentist" description="to pass dentist ID to component" type="String" assignTo="{!dentistId}"/>
     <apex:pageBlock >
