@@ -15,4 +15,8 @@ public class DEN_HoursConverterController {
     public static String addLeadingZeros(String str) {
         return str.leftPad(2).replace(' ', '0');
     }
+    
+    public static String getPeriodString(Integer startTime, Integer endTime) {
+        return getStringValue(startTime) + ' - ' + getStringValue(endTime);
+    }
 }

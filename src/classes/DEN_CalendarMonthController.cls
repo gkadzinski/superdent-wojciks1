@@ -1,14 +1,7 @@
 public with sharing class DEN_CalendarMonthController {
     public static final List<String> WEEKDAYS = new List<String> {'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'};
 	
-    private DateTime dateGiven;
-    public Date displayedMonth {
-        get;
-        set {
-            displayedMonth = value;
-            dateGiven = DateTime.newInstance(displayedMonth, Time.newInstance(0, 0, 0, 0));
-        }
-    }
+    public Date displayedMonth {get; set;}
     public Id dentistId {get; set;}
     public Integer selectedDay {get; set;}
     private List<DEN_Config__c> userConfig {get; set;}
@@ -20,7 +13,7 @@ public with sharing class DEN_CalendarMonthController {
         List<Integer> result = new List<Integer>();
         if (dentistId != null && selectedDay != null) {
             Date selDate = Date.newInstance(displayedMonth.year(), displayedMonth.month(), selectedDay);
-            String selDateWeekDay = DateTime.newInstance(selDate, Time.newInstance(0, 0, 0, 0)).format('EEE').toUpperCase();
+            String selDateWeekDay = DEN_DateUtil.getWeekdayFrom(selDate);
             Boolean dateConfig = false;
             for (DEN_Config__c config : userConfig) {
                 if (config.Date__c != null && config.Date__c == selDate) {
@@ -57,7 +50,7 @@ public with sharing class DEN_CalendarMonthController {
                     }
                 }
             }
-            String timePeriod = DEN_HoursConverterController.getStringValue(startTime) + ' - ' + DEN_HoursConverterController.getStringValue(endTime);
+            String timePeriod = DEN_HoursConverterController.getPeriodString(startTime, endTime);
             result.add(new TimeWrapper(timePeriod, available));
         }
         return result;
@@ -72,11 +65,11 @@ public with sharing class DEN_CalendarMonthController {
 	}
 
 	public String getFirstDayOfMonth() {
-		return dateGiven.format('EEE');
+		return DEN_DateUtil.getWeekdayFrom(displayedMonth);
 	}
     
     public String getActualMonthName() {
-        return dateGiven.format('MMM YY');
+        return DEN_DateUtil.getDateTime(displayedMonth).format('MMM YY');
     }
 
 	public List<CalendarWrapper> getCalendarDays() {        
@@ -84,7 +77,8 @@ public with sharing class DEN_CalendarMonthController {
 		List<CalendarWrapper> result = getLeadingDays(getFirstDayOfMonth());
 		for (Integer day=0; day<getDaysInMonthCount(); day++) {
             Boolean available = false;
-			String dayOfWeek = DateTime.newInstance(Date.newInstance(displayedMonth.year(), displayedMonth.month(), day +1), Time.newInstance(0, 0, 0, 0)).format('EEE');
+            Date selDate = Date.newInstance(displayedMonth.year(), displayedMonth.month(), day +1);
+			String dayOfWeek = DEN_DateUtil.getWeekdayFrom(selDate);
             if (displayedMonth.addDays(day) > Date.today()) {
                 for (DEN_Config__c config : userConfig) {
                     if ((config.Weekday__c != null && config.Weekday__c.equals(dayOfWeek.toUpperCase())) || (config.Date__c != null && config.Date__c == displayedMonth.addDays(day))) {

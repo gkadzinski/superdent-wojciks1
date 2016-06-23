@@ -1,33 +1,106 @@
 <apex:component controller="DEN_CalendarMonthController">
-    <apex:attribute name="dentist" description="to pass dentist ID to component" type="String" assignTo="{!dentistId}"/>    
-    <apex:outputPanel id="datePicker">
-        <apex:panelGrid columns="3">
-            <apex:commandLink action="{!previousMonth}" reRender="datePicker" oncomplete="styleCalendarDays();">Previous Month</apex:commandLink>
-            <apex:outputLabel >{!actualMonthName}</apex:outputLabel>
-            <apex:commandLink action="{!nextMonth}" reRender="datePicker" oncomplete="styleCalendarDays();">Next Month</apex:commandLink>
-        </apex:panelGrid>
-        <apex:outputPanel id="month">
-            <apex:repeat value="{!calendarDays}" var="cal">
-                <div style="width: 65px; height: 65px; border: solid 1px black; float: left; margin: 5px 5px;" onclick="showDayAvailability('{!cal.day}');">
-                    <apex:outputText value="{!cal.dayOfWeek}" style="font-size: 10px;"/><br/>
-                    <apex:outputText value="{!cal.day}" style="font-size: 25px;" id="dayNumber"/>
-                    <apex:outputText value="{!cal.available}" id="dayAvailability"/>
-                </div>
-            </apex:repeat>
-            <apex:actionFunction name="daySelected" reRender="timePicker" oncomplete="markAvailableTime();">
-                <apex:param assignTo="{!selectedDay}" name="selectedDay" value=""/>
-            </apex:actionFunction>
-        </apex:outputPanel>
-    </apex:outputPanel>
-    <apex:outputPanel id="timePicker">
-        <apex:pageBlockSection collapsible="false" showHeader="false" columns="1">
-            <apex:pageBlockSectionItem >
-                <apex:outputLabel >Selected dentist: {!dentistName}<br/>Available time slots for date: {!selectedDay} {!actualMonthName}<br/></apex:outputLabel>
-                <apex:pageBlockTable value="{!AllTimeSlots}" var="time" style="width: 10%;" id="timeSlotTable" onclick="markAvailableTime();">
-                    <apex:column headerValue="TimeSlots" value="{!time.timePeriod}" onclick="timeSelected('{!time.timePeriod}');" id="timeSlot"/>
-                    <apex:column headerValue="Available?" value="{!time.available}" id="timeAvailability"/>
+    <style type="text/css">
+        .availabletrue {
+        	background-color: green;
+        }
+        
+        .availablefalse {
+        	background-color: red;
+        }
+        
+        .day {
+        	cursor: pointer;
+        	width: 85px;
+        	height: 85px;
+        	border: solid 1px black;
+        	float: left;
+        	margin: 5px 5px;
+        }
+        
+        .day:nth-child(7n+8) {
+        	clear: both;
+        }
+        
+        .day:nth-child(7n+6), .day:nth-child(7n+7) {
+        	font-weight: bold;
+        	font-style: italic;
+        }
+        
+        .selectedDay {
+        	background-color: yellow;
+        }
+    </style>
+    <script type="text/javascript">
+    var timePicker;
+    
+    j$(document).ready(function() {
+        hideTimePicker();
+    });
+    
+    function hideTimePicker() {
+        timePicker = j$('[id*=timePicker]');
+        timePicker.hide();
+    }
+    
+    function dateSelected(day) {
+        j$('[id*=dayNumber]').each(function() {
+            if (j$(this).text() == day) {
+                if (j$(this).parent().hasClass('availabletrue')) {
+                    j$('.selectedDay').removeClass('selectedDay');
+                    j$(this).parent().addClass('selectedDay');
+                    selectedDay(day);
+                    timePicker = j$('[id*=timePicker]');
+                    timePicker.show();
+                }
+                else {
+                    alert('Please select available day (marked - Green)');
+                    return false;
+                }
+            }
+        });
+    }
+    
+    function openForm(time) {
+        j$('[id*=timeSlot]').each(function() {
+            if (j$(this).text() == time) {
+                if (j$(this).hasClass('availabletrue')) {
+                    alert('otwieram formularz.... TBD');
+                }
+                else {
+                    alert('Please select available Time (marked - Green)');
+                    return false;
+                }
+            }
+        });
+    }
+    </script>
+    <apex:attribute name="dentist" description="to pass dentist ID to component" type="String" assignTo="{!dentistId}"/>
+    <apex:pageBlock >
+        <apex:pageBlockSection columns="2">
+            <apex:outputPanel id="datePicker">
+                <apex:panelGrid columns="3">
+                    <apex:commandLink action="{!previousMonth}" reRender="datePicker" oncomplete="hideTimePicker();">Previous Month</apex:commandLink>
+                    <apex:outputLabel style="font-size: 200%; font-weight: bold;">{!actualMonthName}</apex:outputLabel>
+                    <apex:commandLink action="{!nextMonth}" reRender="datePicker" oncomplete="hideTimePicker();">Next Month</apex:commandLink>
+                </apex:panelGrid>
+                <apex:outputPanel >
+                    <apex:repeat value="{!calendarDays}" var="cal">
+                        <div class="available{!cal.available} day" onclick="dateSelected('{!cal.day}');">
+                            <apex:outputText value="{!cal.dayOfWeek}" style="font-size: 10px;"/><br/>
+                            <apex:outputText value="{!cal.day}" style="font-size: 25px;" id="dayNumber"/>
+                        </div>
+                    </apex:repeat>
+                    <apex:actionFunction name="selectedDay" reRender="timePicker">
+                        <apex:param assignTo="{!selectedDay}" name="selectedDay" value=""/>
+                    </apex:actionFunction>
+                </apex:outputPanel>
+            </apex:outputPanel>
+            <apex:outputPanel id="timePicker">
+                <apex:outputLabel >Selected dentist: {!dentistName}<br/>Available time slots for date: {!selectedDay} {!actualMonthName}</apex:outputLabel>        
+                <apex:pageBlockTable value="{!AllTimeSlots}" var="time" style="width: 20%;">
+                    <apex:column headerValue="TimeSlots" value="{!time.timePeriod}" onclick="openForm('{!time.timePeriod}');" id="timeSlot" styleClass="available{!time.available}" style="cursor: pointer;"/>
                 </apex:pageBlockTable>
-            </apex:pageBlockSectionItem>
+            </apex:outputPanel>
         </apex:pageBlockSection>
-    </apex:outputPanel>
+    </apex:pageBlock>
 </apex:component>
