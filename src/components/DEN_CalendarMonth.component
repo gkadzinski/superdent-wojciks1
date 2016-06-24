@@ -10,8 +10,8 @@
         
         .day {
         	cursor: pointer;
-        	width: 85px;
-        	height: 85px;
+        	width: 75px;
+        	height: 75px;
         	border: solid 1px black;
         	float: left;
         	margin: 5px 5px;
@@ -79,18 +79,18 @@
         <apex:pageBlockSection columns="2">
             <apex:outputPanel id="datePicker">
                 <apex:panelGrid columns="3">
-                    <apex:commandLink action="{!previousMonth}" reRender="datePicker" oncomplete="hideTimePicker();">Previous Month</apex:commandLink>
+                    <apex:commandLink action="{!previousMonth}" reRender="datePicker" onclick="showLoading();" oncomplete="hideTimePicker(); hideLoading();">Previous Month</apex:commandLink>
                     <apex:outputLabel style="font-size: 200%; font-weight: bold;">{!actualMonthName}</apex:outputLabel>
-                    <apex:commandLink action="{!nextMonth}" reRender="datePicker" oncomplete="hideTimePicker();">Next Month</apex:commandLink>
+                    <apex:commandLink action="{!nextMonth}" reRender="datePicker" onclick="showLoading();" oncomplete="hideTimePicker(); hideLoading();">Next Month</apex:commandLink>
                 </apex:panelGrid>
                 <apex:outputPanel >
                     <apex:repeat value="{!calendarDays}" var="cal">
-                        <div class="available{!cal.available} day" onclick="dateSelected('{!cal.day}');">
+                        <div class="available{!cal.available} day" onclick="showLoading(); dateSelected('{!cal.day}');">
                             <apex:outputText value="{!cal.dayOfWeek}" style="font-size: 10px;"/><br/>
                             <apex:outputText value="{!cal.day}" style="font-size: 25px;" id="dayNumber"/>
                         </div>
                     </apex:repeat>
-                    <apex:actionFunction name="selectedDay" reRender="timePicker">
+                    <apex:actionFunction name="selectedDay" reRender="timePicker" oncomplete="hideLoading();">
                         <apex:param assignTo="{!selectedDay}" name="selectedDay" value=""/>
                     </apex:actionFunction>
                 </apex:outputPanel>

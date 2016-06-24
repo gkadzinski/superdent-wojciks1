@@ -33,6 +33,10 @@
         <name>Profile</name>
     </types>
     <types>
+        <members>*</members>
+        <name>StaticResource</name>
+    </types>
+    <types>
         <members>DEN_Appointment__c</members>
         <members>DEN_Config__c</members>
         <name>Workflow</name>

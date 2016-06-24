@@ -5,22 +5,46 @@
             .dentistTable {
             	cursor: pointer;
             }
+            
+            .spinner {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                margin-left: -50px;
+                margin-top: -50px;
+                text-align:center;
+                z-index:1234;
+                overflow: auto;
+                width: 100px;
+                height: 102px;
+            }
         </style>
         <script type="text/javascript">
-        j$ = jQuery.noConflict();
-        var calendarPanel;
-        var dentistType;
+            j$ = jQuery.noConflict();
+            var calendarPanel;
+            var dentistType;
+            var filteredDate;
+            
+            j$(document).ready(function() {
+                dentistType = j$('[id*=dentistType]');
+                filteredDate = j$('[id*=filteredDate]');
+                hideCalendarPanel();
+                filteredDate.change(hideCalendarPanel);
+                dentistType.change(hideCalendarPanel);
+            });
+    
+            function hideCalendarPanel() {
+                calendarPanel = j$('[id*=calendar]');
+                calendarPanel.hide();
+            }
         
-        j$(document).ready(function() {
-            dentistType = j$('[id*=dentistType]');
-            hideCalendarPanel();
-            dentistType.change(hideCalendarPanel);
-        });
-
-        function hideCalendarPanel() {
-            calendarPanel = j$('[id*=calendar]');
-            calendarPanel.hide();
-        }
+        	function showLoading() {
+                j$('[id*=spinner]').show();
+            }
+        
+        	function hideLoading() {
+                j$('[id*=spinner]').hide();
+            }
         </script>
         <apex:pageBlock title="Welcome in Superdent Registration form.">
             <apex:pageBlockSection collapsible="false" columns="1" title="Please select Dentist and available time for Appointment">
@@ -28,17 +52,23 @@
                     <apex:outputLabel >Filter by type:</apex:outputLabel>
                     <apex:selectList value="{!dentistType}" size="1" multiselect="false" id="dentistType" styleClass="dentistTable">
                         <apex:selectOptions value="{!dentistTypes}"/>
-                        <apex:actionSupport action="{!filterTypes}" event="onchange" reRender="dentists"/>
+                        <apex:actionSupport action="{!filterTypes}" event="onchange" reRender="dentists" onsubmit="showLoading();" oncomplete="hideLoading();"/>
                     </apex:selectList>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Filter by date:</apex:outputLabel>
+                    <apex:inputField value="{!appointment.Date__c}" id="filteredDate">
+                        <apex:actionSupport action="{!filterTypes}" event="onchange" reRender="dentists" onsubmit="showLoading();" oncomplete="hideLoading();"/>
+                    </apex:inputField>
                 </apex:pageBlockSectionItem>
                 <apex:pageBlockSectionItem >
                     <apex:pageBlockTable value="{!dentists}" var="den" style="width: 25%" id="dentists" styleClass="dentistTable">
                         <apex:column headerValue="Dentist" value="{!den.Name}" onclick="dentistSelected('{!den.Id}');"/>
-                        <apex:column headerValue="Specialization" value="{!den.Type__c}" onclick="dentistSelected('{!den.Id}');"/>
+                        <apex:column headerValue="Specialization" value="{!den.Type__c}" onclick="showLoading(); dentistSelected('{!den.Id}');"/>
                     </apex:pageBlockTable>
                 </apex:pageBlockSectionItem>
             </apex:pageBlockSection>
-            <apex:actionFunction name="dentistSelected" reRender="calendar">
+            <apex:actionFunction name="dentistSelected" reRender="calendar" oncomplete="hideLoading();">
                 <apex:param assignTo="{!dentistId}" name="dentist" value=""/>
             </apex:actionFunction>
             <apex:pageBlockSection columns="1">
@@ -48,4 +78,7 @@
             </apex:pageBlockSection>
         </apex:pageBlock>
     </apex:form>
+    <div id="spinner" class="spinner" style="display:none;">
+    	<img id="img-spinner" src="{!$Resource.DEN_spinner}" alt="Loading"/>
+    </div>
 </apex:page>

@@ -23,6 +23,11 @@
     <custom>true</custom>
     <fieldPermissions>
         <editable>true</editable>
+        <field>DEN_Appointment__c.Date__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>DEN_Appointment__c.Dentist__c</field>
         <readable>true</readable>
     </fieldPermissions>

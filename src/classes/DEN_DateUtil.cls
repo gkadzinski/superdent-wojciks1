@@ -4,7 +4,7 @@ public class DEN_DateUtil {
     }
     
     public static String getWeekdayFrom(Date displayedMonth, Integer day) {
-        return getDateTime(getDateFrom(selDate, day)).format('EEE');
+        return getDateTime(getDateFrom(displayedMonth, day)).format('EEE');
     }
     
     public static DateTime getDateTime(Date selDate) {
