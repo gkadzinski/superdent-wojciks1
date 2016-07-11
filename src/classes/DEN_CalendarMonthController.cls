@@ -45,7 +45,7 @@ public with sharing class DEN_CalendarMonthController {
 		for (Integer day=0; day<DEN_DateUtil.getDaysInMonthCount(displayedMonth); day++) {
             Boolean available = false;
 			String dayOfWeek = DEN_DateUtil.getWeekdayFrom(displayedMonth, day + 1);
-            if (displayedMonth.addDays(day) > Date.today()) {
+            if (displayedMonth.addDays(day) >= Date.today()) {
                 for (DEN_Config__c config : userConfig) {
                     if ((config.Weekday__c != null && config.Weekday__c.equals(dayOfWeek.toUpperCase())) || (config.Date__c != null && config.Date__c == displayedMonth.addDays(day))) {
                         available = true;

@@ -9,9 +9,11 @@ public with sharing class DEN_RegistrationController {
     public String dentistType {get; set;}
     public Id dentistId {get; set;}
     public DEN_Appointment__c appointment {get; set;}
+    public Contact contact {get; set;}
     
     public DEN_RegistrationController() {
         appointment = new DEN_Appointment__c();
+        contact = new Contact();
     }
     
     public ApexPages.StandardSetController dentistSetCon {
@@ -61,5 +63,18 @@ public with sharing class DEN_RegistrationController {
         else {
             return appointment.Date__c == null ? FILTERED_DENTISTS : FILTERED_DENTISTS_DATE;
     	}
+    }
+    
+    private void processContact() {
+		String email = contact.Email;
+        List<Contact> contactsMatched = [SELECT Id, Name, Email FROM Contact WHERE Email =: email];
+        if (contactsMatched.isEmpty()) {
+            insert contact;
+        }
+    }
+    
+    public PageReference send() {
+       	processContact();
+        return null;
     }
 }

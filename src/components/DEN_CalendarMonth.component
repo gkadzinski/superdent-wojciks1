@@ -61,10 +61,12 @@
 	    }
 	    
 	    function openForm(time) {
+            j$('[id*=timeSlot]').removeClass('selectedDay');
 	        j$('[id*=timeSlot]').each(function() {
 	            if (j$(this).text() == time) {
 	                if (j$(this).hasClass('availabletrue')) {
-	                    alert('otwieram formularz.... TBD');
+                        j$(this).addClass('selectedDay');
+                        openPopup();
 	                }
 	                else {
 	                    alert('Please select available Time (marked - Green)');

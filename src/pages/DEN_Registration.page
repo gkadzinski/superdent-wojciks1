@@ -18,20 +18,55 @@
                 width: 100px;
                 height: 102px;
             }
+            
+            .overlay {
+            	z-index: 90;
+            	background-color: black;
+            	opacity: 0.40;
+            	filter: alpha(opacity = 40);
+            	height: 100%;
+            	width: 100%;
+            	position: fixed;
+            	top: 0;
+            	left: 0;
+            }
+            
+            .dialog {
+            	background-color: white;
+            	border-left: #690 5px solid;
+            	border-top: #555 1px solid;
+            	border-bottom: #555 1px solid;
+            	border-right: #550 1px solid;
+            	z-index: 99;
+            	left: 50%;
+            	padding: 10px;
+            	position: fixed;
+            	width: 480px;
+            	margin-left: -240px;
+            	top: 30px;
+            }
         </style>
         <script type="text/javascript">
             j$ = jQuery.noConflict();
             var calendarPanel;
             var dentistType;
             var filteredDate;
+        	var recordType;
             
             j$(document).ready(function() {
                 dentistType = j$('[id*=dentistType]');
                 filteredDate = j$('[id*=filteredDate]');
+                recordType = j$('[id*=recordType]');
+                j$('[id*=formDesc]').closest('tr').hide();
                 hideCalendarPanel();
                 filteredDate.change(hideCalendarPanel);
                 dentistType.change(hideCalendarPanel);
+                recordType.change(descToggle);
             });
+        
+        	function descToggle() {
+                j$('[id*=formDesc]').closest('tr').toggle();
+            }
     
             function hideCalendarPanel() {
                 calendarPanel = j$('[id*=calendar]');
@@ -44,6 +79,28 @@
         
         	function hideLoading() {
                 j$('[id*=spinner]').hide();
+            }
+        
+        	function openPopup() {
+                j$('[id*=popupPanel]').show();
+            }
+        
+        	function closePopup() {
+                j$('[id*=popupPanel]').hide();
+            }
+        
+        	function validateForm() {
+                if (!j$('[id*=firstName]').val() || !j$('[id*=lastName]').val() || !validateEmail(j$('[id*=email]').val())){
+                	return false;
+                }
+                else {
+                    processForm();
+                }
+            }
+        
+        	function validateEmail(email) {
+                var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                return re.test(email);
             }
         </script>
         <apex:pageBlock title="Welcome in Superdent Registration form.">
@@ -79,6 +136,31 @@
         </apex:pageBlock>
     </apex:form>
     <div id="spinner" class="spinner" style="display:none;">
-    	<img id="img-spinner" src="{!$Resource.DEN_spinner}" alt="Loading"/>
+    	<img src="{!$Resource.DEN_spinner}" alt="Loading"/>
     </div>
+    <apex:outputPanel id="popupPanel" style="display: none;">
+        <apex:form >
+            <apex:outputPanel >
+                <div class="overlay"></div>
+                <div class="dialog">
+                    <apex:pageBlock >
+                        <apex:pageMessage summary="Please fill appointment form (required fields marked red)" severity="info" strength="1"/>
+                        <apex:pageBlockButtons location="bottom">
+                            <apex:commandButton value="Send" onclick="validateForm();" reRender="firstName, lastName, email"/>
+                            <apex:commandButton value="Cancel" onclick="closePopup(); return false;"/>
+                            <apex:actionFunction name="processForm" action="{!send}" oncomplete="alert('Thank you for registration.'); location.reload();"/>
+                        </apex:pageBlockButtons>
+                        <apex:pageBlockSection columns="1" id="inputFields">
+                            <apex:inputField value="{!appointment.RecordTypeId}" label="Appointment Type" id="recordType"/>
+                            <apex:inputField value="{!contact.FirstName}" required="true" id="firstName"/>
+                            <apex:inputField value="{!contact.LastName}" required="true" id="lastName"/>
+                            <apex:inputField value="{!contact.Email}" required="true" id="email"/>
+                            <apex:inputField value="{!appointment.Telephone__c}"/>
+                            <apex:inputField value="{!appointment.Description__c}" id="formDesc"/>
+                        </apex:pageBlockSection>
+                    </apex:pageBlock>
+                </div>
+            </apex:outputPanel>
+        </apex:form>
+    </apex:outputPanel>
 </apex:page>
