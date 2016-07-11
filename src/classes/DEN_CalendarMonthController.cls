@@ -39,7 +39,7 @@ public with sharing class DEN_CalendarMonthController {
         return result;
     }
     
-	public List<CalendarWrapper> getCalendarDays() {        
+	public List<CalendarWrapper> getCalendarDays() {
         userConfig = [SELECT Id, Name, Weekday__c, Date__c, StartingHour__c, EndingHour__c FROM DEN_Config__c WHERE Dentist__c =: dentistId];
 		List<CalendarWrapper> result = getLeadingDays(DEN_DateUtil.getWeekdayFrom(displayedMonth));
 		for (Integer day=0; day<DEN_DateUtil.getDaysInMonthCount(displayedMonth); day++) {

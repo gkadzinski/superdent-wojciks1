@@ -109,7 +109,7 @@
         <picklist>
             <picklistValues>
                 <fullName>Oczekująca na potwierdzenie</fullName>
-                <default>false</default>
+                <default>true</default>
             </picklistValues>
             <picklistValues>
                 <fullName>Zaakceptowana</fullName>
