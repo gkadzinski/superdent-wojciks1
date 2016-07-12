@@ -88,7 +88,8 @@ public with sharing class DEN_RegistrationController {
         Id ClientId = appointment.Patient__c;
         Contact client = [SELECT FirstName, LastName FROm Contact WHERE Id =: clientId][0];
         return (dentist.FirstName.left(1) + dentist.LastName.left(1) + '_' + client.FirstName.left(1) + client.LastName.left(1)).toUpperCase() + '_' +
-            appointment.Date__c.year() + appointment.Date__c.month() + appointment.Date__c.day() + '_' + appointment.DateTime__c.hour() + appointment.DateTime__c.minute();
+            appointment.Date__c.year() + String.valueOf(appointment.Date__c.month()).leftPad(2).replace(' ', '0') + String.valueOf(appointment.Date__c.day()).leftPad(2).replace(' ', '0') +
+            '_' + String.valueOf(appointment.DateTime__c.hour()).leftPad(2).replace(' ', '0') + String.valueOf(appointment.DateTime__c.minute()).leftPad(2).replace(' ', '0');
     }
     
     private String getDefaultStatus() {

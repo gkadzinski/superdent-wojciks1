@@ -14,12 +14,22 @@
     </types>
     <types>
         <members>*</members>
+        <name>ApprovalProcess</name>
+    </types>
+    <types>
+        <members>*</members>
         <members>User</members>
         <name>CustomObject</name>
     </types>
     <types>
         <members>*</members>
         <name>CustomTab</name>
+    </types>
+    <types>
+        <members>unfiled$public</members>
+        <members>unfiled$public/DEN_ClientNotification</members>
+        <members>unfiled$public/DEN_DentistEmailNotification</members>
+        <name>EmailTemplate</name>
     </types>
     <types>
         <members>DEN_Appointment__c-DEN_Appointment Layout</members>

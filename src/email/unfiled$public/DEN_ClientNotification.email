@@ -1,0 +1,3 @@
+Dear Customer,
+
+your appointment has changed status to: {!DEN_Appointment__c.Status__c}
