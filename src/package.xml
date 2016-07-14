@@ -36,6 +36,10 @@
         <name>EmailTemplate</name>
     </types>
     <types>
+        <members>*</members>
+        <name>Flow</name>
+    </types>
+    <types>
         <members>DEN_Appointment__c-DEN_Appointment Layout</members>
         <members>DEN_Appointment__c-DEN_Consultation</members>
         <members>DEN_Appointment__c-DEN_Treatment</members>
