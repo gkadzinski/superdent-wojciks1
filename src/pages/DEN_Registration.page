@@ -7,6 +7,7 @@
             }
             
             .spinner {
+            	background-color: white;
                 position: fixed;
                 top: 50%;
                 left: 50%;
@@ -15,8 +16,8 @@
                 text-align:center;
                 z-index:1234;
                 overflow: auto;
-                width: 100px;
-                height: 102px;
+                width: auto;
+                height: auto;
             }
             
             .overlay {
@@ -130,13 +131,16 @@
             </apex:actionFunction>
             <apex:pageBlockSection columns="1">
                 <apex:outputPanel id="calendar">
-                	<c:DEN_CalendarMonth dentist="{!dentistId}"/>
+                	<c:DEN_CalendarMonth dentist="{!dentistId}" appoint="{!appointment}"/>
                 </apex:outputPanel>
             </apex:pageBlockSection>
         </apex:pageBlock>
     </apex:form>
-    <div id="spinner" class="spinner" style="display:none;">
-    	<img src="{!$Resource.DEN_spinner}" alt="Loading"/>
+    <div id="spinner" style="display:none;">
+        <div class="overlay"></div>
+        <div class="spinner">
+            <img src="{!$Resource.DEN_spinner}" alt="Loading"/>
+        </div>
     </div>
     <apex:outputPanel id="popupPanel" style="display: none;">
         <apex:form >
@@ -147,8 +151,8 @@
                         <apex:pageMessage summary="Please fill appointment form (required fields marked red)" severity="info" strength="1"/>
                         <apex:pageBlockButtons location="bottom">
                             <apex:commandButton value="Send" onclick="validateForm();" reRender="firstName, lastName, email"/>
-                            <apex:commandButton value="Cancel" onclick="closePopup(); return false;"/>
-                            <apex:actionFunction name="processForm" action="{!send}" oncomplete="alert('Thank you for registration.'); location.reload();"/>
+                            <apex:commandButton value="Cancel" onclick="closePopup(); this.form.reset(); return false;"/>
+                            <apex:actionFunction name="processForm" action="{!save}" oncomplete="alert('Thank you for registration.'); location.reload();"/>
                         </apex:pageBlockButtons>
                         <apex:pageBlockSection columns="1" id="inputFields">
                             <apex:inputField value="{!appointment.RecordTypeId}" label="Appointment Type" id="recordType"/>

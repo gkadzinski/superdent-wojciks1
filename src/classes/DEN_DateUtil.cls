@@ -23,5 +23,10 @@ public class DEN_DateUtil {
     	return Date.newInstance(displayedMonth.year(), displayedMonth.month(), day);
     }
     
-    
+    public static String getDateTimeSuffix(DateTime dt) {
+        Date mydate = dt.date();
+        String dPrefix = mydate.year() + DEN_HoursConverterController.addLeadingZeros(String.valueOf(mydate.month())) + DEN_HoursConverterController.addLeadingZeros(String.valueOf(mydate.day()));
+        String dSuffix = DEN_HoursConverterController.addLeadingZeros(String.valueOf(dt.hour())) + DEN_HoursConverterController.addLeadingZeros(String.valueOf(dt.minute()));
+        return dPrefix + '_' + dSuffix;
+    }
 }

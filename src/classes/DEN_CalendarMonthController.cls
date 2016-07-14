@@ -3,8 +3,16 @@ public with sharing class DEN_CalendarMonthController {
 	
     private List<DEN_Config__c> userConfig {get; set;}
     public Id dentistId {get; set;}
+    public DEN_Appointment__c appointment {get; set;}
     public Date displayedMonth {get; set;}
     public Integer selectedDay {get; set;}
+    public String selectedTime {get;
+                                set {
+                                	selectedTime = value;
+                                    appointment.DateTime__c = DateTime.newInstance(DEN_DateUtil.getDateFrom(displayedMonth, selectedDay), DEN_HoursConverterController.getStartTime(selectedTime));
+                                    appointment.Date__c = appointment.DateTime__c.date();
+                                }
+                               }
     
     public DEN_CalendarMonthController() {
         displayedMonth = Date.today().toStartOfMonth();

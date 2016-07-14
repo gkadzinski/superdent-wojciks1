@@ -66,6 +66,7 @@
 	            if (j$(this).text() == time) {
 	                if (j$(this).hasClass('availabletrue')) {
                         j$(this).addClass('selectedDay');
+                        selectedTime(time);
                         openPopup();
 	                }
 	                else {
@@ -77,6 +78,7 @@
 	    }
     </script>
     <apex:attribute name="dentist" description="to pass dentist ID to component" type="String" assignTo="{!dentistId}"/>
+    <apex:attribute name="appoint" description="appointment object to communicate" type="DEN_Appointment__c" assignTo="{!appointment}"/>
     <apex:pageBlock >
         <apex:pageBlockSection columns="2">
             <apex:outputPanel id="datePicker">
@@ -102,6 +104,9 @@
                 <apex:pageBlockTable value="{!AllTimeSlots}" var="time" style="width: 20%;">
                     <apex:column headerValue="TimeSlots" value="{!time.timePeriod}" onclick="openForm('{!time.timePeriod}');" id="timeSlot" styleClass="available{!time.available}" style="cursor: pointer;"/>
                 </apex:pageBlockTable>
+                <apex:actionFunction name="selectedTime" reRender="false">
+                    <apex:param assignTo="{!selectedTime}" name="selectedTime" value=""/>
+                </apex:actionFunction>
             </apex:outputPanel>
         </apex:pageBlockSection>
     </apex:pageBlock>

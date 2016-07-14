@@ -19,4 +19,11 @@ public class DEN_HoursConverterController {
     public static String getPeriodString(Integer startTime, Integer endTime) {
         return getStringValue(startTime) + ' - ' + getStringValue(endTime);
     }
+    
+    public static Time getStartTime(String timePeriod) {
+        List<String> startTime = timePeriod.split(' - ')[0].split(':');
+        Integer hours = Integer.valueOf(startTime[0]);
+        Integer minutes = Integer.valueOf(startTime[1]);
+        return Time.newInstance(hours, minutes, 0, 0);
+    }
 }

@@ -65,31 +65,24 @@ public with sharing class DEN_RegistrationController {
     	}
     }
     
-    public PageReference send() {
+    public PageReference save() {
         String email = contact.Email;
-        List<Contact> contactsMatched = [SELECT Id, Name, Email FROM Contact WHERE Email =: email];
+        List<Contact> contactsMatched = [SELECT Id, Name, FirstName, LastName, Phone, Email FROM Contact WHERE Email =: email];
         if (contactsMatched.isEmpty()) {
             insert contact;
+            appointment.Patient__c = contact.Id;
+        }
+        else {
+            contactsMatched[0].FirstName = contact.FirstName;
+            contactsMatched[0].LastName = contact.LastName;
+            contactsMatched[0].Phone = appointment.Telephone__c;
+            update contactsMatched[0];
+            appointment.Patient__c = contactsMatched[0].Id;
         }
         appointment.Status__c = getDefaultStatus();
         appointment.Dentist__c = dentistId;
-        appointment.Patient__c = [SELECT Id, Name, Email FROM Contact WHERE Email =: email][0].Id;
-        //temp
-        appointment.Date__c = Date.newInstance(2016, 07, 18);
-        //temp
-        appointment.DateTime__c = DateTime.newInstance(appointment.Date__c, Time.newInstance(0, 0, 0, 0));
-        appointment.Name = getAppointmentName();
         insert appointment;
         return null;
-    }
-	
-    private String getAppointmentName() {
-        User dentist = [SELECT FirstName, LastName FROM User WHERE Id =: dentistId][0];
-        Id ClientId = appointment.Patient__c;
-        Contact client = [SELECT FirstName, LastName FROm Contact WHERE Id =: clientId][0];
-        return (dentist.FirstName.left(1) + dentist.LastName.left(1) + '_' + client.FirstName.left(1) + client.LastName.left(1)).toUpperCase() + '_' +
-            appointment.Date__c.year() + String.valueOf(appointment.Date__c.month()).leftPad(2).replace(' ', '0') + String.valueOf(appointment.Date__c.day()).leftPad(2).replace(' ', '0') +
-            '_' + String.valueOf(appointment.DateTime__c.hour()).leftPad(2).replace(' ', '0') + String.valueOf(appointment.DateTime__c.minute()).leftPad(2).replace(' ', '0');
     }
     
     private String getDefaultStatus() {
