@@ -1,4 +1,4 @@
-Dear {!DEN_Appointment__c.Dentist__c}
+Dear {!User.Name}
 
 There is a new appointment created.
 Please approve / reject.

@@ -34,7 +34,7 @@ public with sharing class DEN_CalendarMonthController {
             available = false;
             Integer startTime = i*60;
             Integer endTime = (i + 1)*60;
-            if (availableTimePeriod.size() > 0) {
+            if (!availableTimePeriod.isEmpty()) {
                 for (Integer idx=0; idx<availableTimePeriod.size(); idx+=2) {
                     If (startTime >= availableTimePeriod[idx] && endTime <= availableTimePeriod[idx + 1]) {
                         available = true;
@@ -79,6 +79,7 @@ public with sharing class DEN_CalendarMonthController {
 	
 	private List<Integer> getAvailableSlots() {
         List<Integer> result = new List<Integer>();
+        List<Integer> resultsToRemove = new List<Integer>();
         if (dentistId != null && selectedDay != null) {
             Date selDate = DEN_DateUtil.getDateFrom(displayedMonth, selectedDay);
             String selDateWeekDay = DEN_DateUtil.getWeekdayFrom(selDate);
@@ -99,10 +100,44 @@ public with sharing class DEN_CalendarMonthController {
                     }
                 }
             }
+            List<DEN_Appointment__c> slotsWithVisits = [SELECT DateTime__c FROM DEN_Appointment__c WHERE Date__c =: selDate and Dentist__c =: dentistId and Status__c != 'Odrzucona'];
+            if (!slotsWithVisits.isEmpty()) {
+                for (DEN_Appointment__c appointment : slotsWithVisits) {
+                    resultsToRemove.add(appointment.DateTime__c.hour()*60);
+                }
+            }
         }
-        return result;
+        return getLimitedResults(result, resultsToRemove);
     }
 
+    private static List<Integer> getLimitedResults(List<Integer> result, List<Integer> resultsToRemove) {
+        List<Integer> resultList = new List<Integer>();
+        if (!resultsToRemove.isEmpty()) {
+            for (Integer badEL : resultsToRemove) {
+                for (Integer i=0; i<result.size(); i+=2) {
+                    if (!(badEl >= result[i] && badEL < result[i + 1])) {
+                        resultList.add(result[i]);
+                        resultList.add(result[i + 1]);
+                    }
+                    else {
+                        if (badEl != result[i]) {
+                            resultList.add(result[i]);
+                            resultList.add(badEl);
+                        }
+                        if (badEL + 60 != result[i + 1]) {
+                            resultList.add(badEL + 60);
+                            resultList.add(result[i + 1]);
+                        }
+                    }
+                }
+            }
+            return resultList;
+        }
+        else {
+            return result;
+        }
+    }
+    
 	public PageReference nextMonth() {
         displayedMonth = displayedMonth.addMonths(1);
 		return null;
