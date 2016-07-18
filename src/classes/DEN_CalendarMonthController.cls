@@ -107,31 +107,40 @@ public with sharing class DEN_CalendarMonthController {
                 }
             }
         }
-        return getLimitedResults(result, resultsToRemove);
+        return getMultipleElementLimitedResults(result, resultsToRemove);
     }
 
-    private static List<Integer> getLimitedResults(List<Integer> result, List<Integer> resultsToRemove) {
+    private static List<Integer> getSingleElementLimitedResults(List<Integer> result, Integer resultToRemove) {
         List<Integer> resultList = new List<Integer>();
-        if (!resultsToRemove.isEmpty()) {
-            for (Integer badEL : resultsToRemove) {
-                for (Integer i=0; i<result.size(); i+=2) {
-                    if (!(badEl >= result[i] && badEL < result[i + 1])) {
-                        resultList.add(result[i]);
-                        resultList.add(result[i + 1]);
-                    }
-                    else {
-                        if (badEl != result[i]) {
-                            resultList.add(result[i]);
-                            resultList.add(badEl);
-                        }
-                        if (badEL + 60 != result[i + 1]) {
-                            resultList.add(badEL + 60);
-                            resultList.add(result[i + 1]);
-                        }
-                    }
+        Integer startRemove = resultToRemove;
+        Integer endRemove = startRemove + 60;
+        for (Integer i=0; i<result.size(); i+=2) {
+            Integer startInt = result[i];
+            Integer endInt = result[i + 1];
+            if (!(startRemove >= startInt && startRemove < endInt)) {
+                resultList.add(startInt);
+                resultList.add(endInt);
+            }
+            else {
+                if (startRemove != startInt) {
+                    resultList.add(startInt);
+                    resultList.add(startRemove);
+                }
+                if (endRemove != endInt) {
+                    resultList.add(endRemove);
+                    resultList.add(endInt);
                 }
             }
-            return resultList;
+        }
+        return resultList;
+    }
+    
+    private static List<Integer> getMultipleElementLimitedResults(List<Integer> result, List<Integer> resultsToRemove) {
+        if (!resultsToRemove.isEmpty()) {
+            for (Integer element : resultsToRemove) {
+                result = getSingleElementLimitedResults(result, element);
+            }
+            return result;
         }
         else {
             return result;
