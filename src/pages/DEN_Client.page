@@ -1,0 +1,13 @@
+<apex:page standardController="Contact" extensions="DEN_ClientExtension" tabStyle="DEN_Client__tab">
+    <apex:pageBlock title="SuperDent Clients:">
+        <apex:pageBLockSection >
+            <apex:pageBlockTable value="{!clients}" var="client">
+                <apex:column headerValue="Name">
+                    <apex:outputLink value="/{!client.Id}">{!client.Name}</apex:outputLink>
+                </apex:column>
+                <apex:column value="{!client.Phone}"/>
+                <apex:column value="{!client.Email}"/>
+            </apex:pageBlockTable>
+        </apex:pageBLockSection>
+    </apex:pageBlock>
+</apex:page>

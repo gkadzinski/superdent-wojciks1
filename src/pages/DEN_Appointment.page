@@ -1,0 +1,57 @@
+<apex:page standardController="DEN_Appointment__c" tabStyle="DEN_Appointment__tab" extensions="DEN_AppointmentExtension">
+    <apex:pageBlock >
+        <apex:form >
+            <apex:pageMessages />
+            <apex:pageBlockSection title="Filtering:" columns="1">
+                <apex:pageBlockSectionItem rendered="{!ownerLogged}">
+                    <apex:outputLabel >Filter by type:</apex:outputLabel>
+                    <apex:selectList value="{!filteredDentistType}" size="1" multiselect="false">
+                        <apex:selectOptions value="{!dentistTypes}"/>
+                        <apex:actionSupport action="{!applyFilter}" event="onchange" immediate="true" reRender="appointments"/>
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem rendered="{!ownerLogged}">
+                    <apex:outputLabel >Filter by dentist:</apex:outputLabel>
+                    <apex:selectList value="{!filteredDentist}" size="1" multiselect="false">
+                        <apex:selectOptions value="{!dentists}"/>
+                        <apex:actionSupport action="{!applyFilter}" event="onchange" immediate="true" reRender="appointments"/>
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Filter by client:</apex:outputLabel>
+                    <apex:selectList value="{!filteredClient}" size="1" multiselect="false">
+                        <apex:selectOptions value="{!clients}"/>
+                        <apex:actionSupport action="{!applyFilter}" event="onchange" immediate="true" reRender="appointments"/>
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+                <apex:pageBLockSectionItem >
+                    <apex:outputLabel >Filter by type:</apex:outputLabel>
+                    <apex:selectList value="{!filteredType}" size="1" multiselect="false">
+                        <apex:selectOptions value="{!appointmentTypes}"/>
+                        <apex:actionSupport action="{!applyFilter}" event="onchange" immediate="true" reRender="appointments"/>
+                    </apex:selectList>
+                </apex:pageBLockSectionItem>
+                <apex:pageBLockSectionItem >
+                    <apex:outputLabel >Filter by status:</apex:outputLabel>
+                    <apex:selectList value="{!filteredStatus}" size="1" multiselect="false">
+                        <apex:selectOptions value="{!statuses}"/>
+                        <apex:actionSupport action="{!applyFilter}" event="onchange" immediate="true" reRender="appointments"/>
+                    </apex:selectList>
+                </apex:pageBLockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Appointments:" collapsible="false">
+                <apex:pageBlockTable value="{!appointments}" var="ap" id="appointments">
+                    <apex:column headerValue="Name">
+                        <apex:outputLink value="/{!ap.Id}">{!ap.Name}</apex:outputLink>
+                    </apex:column>
+                    <apex:column value="{!ap.Dentist__c}" rendered="{!ownerLogged}"/>
+                    <apex:column value="{!ap.Dentist__r.Type__c}" rendered="{!ownerLogged}"/>
+                    <apex:column value="{!ap.Patient__c}"/>
+                    <apex:column value="{!ap.DateTime__c}"/>
+                    <apex:column value="{!ap.RecordTypeId}"/>
+                    <apex:column value="{!ap.Status__c}"/>
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
+        </apex:form>
+    </apex:pageBlock>
+</apex:page>

@@ -81,6 +81,7 @@ public with sharing class DEN_RegistrationController {
         }
         appointment.Status__c = getDefaultStatus();
         appointment.Dentist__c = dentistId;
+        appointment.OwnerId = appointment.Dentist__c;
         insert appointment;
         return null;
     }
