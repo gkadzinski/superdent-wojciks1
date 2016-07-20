@@ -19,7 +19,7 @@ public with sharing class DEN_CalendarMonthController {
 	}
     
     public String getDentistName() {
-        return (dentistId == null ? null : [SELECT Id, Name, Username FROM User WHERE Id =: dentistId].Name);
+        return dentistId == null ? null : [SELECT Id, Name, Username FROM User WHERE Id =: dentistId].Name;
     }
     
     public String getActualMonthName() {
@@ -120,8 +120,7 @@ public with sharing class DEN_CalendarMonthController {
             if (!(startRemove >= startInt && startRemove < endInt)) {
                 resultList.add(startInt);
                 resultList.add(endInt);
-            }
-            else {
+            } else {
                 if (startRemove != startInt) {
                     resultList.add(startInt);
                     resultList.add(startRemove);
@@ -141,8 +140,7 @@ public with sharing class DEN_CalendarMonthController {
                 result = getSingleElementLimitedResults(result, element);
             }
             return result;
-        }
-        else {
+        } else {
             return result;
         }
     }

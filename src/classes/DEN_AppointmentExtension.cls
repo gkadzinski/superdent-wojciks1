@@ -12,13 +12,22 @@ public class DEN_AppointmentExtension {
     
     
     public DEN_AppointmentExtension(ApexPages.StandardController stdController) {
+    	//GK: proponowana nazwa: userId
 		loggedUserId = UserInfo.getUserId();
-        ownerLogged = checkLoggedUserRights(loggedUserId);
+		//GK: isUserOwner, zmienne boolowskie oznaczamy isXXX, hasXXX
+		//GK: lepiej tak sprawdzac, nie po petli
+        ownerLogged = UserInfo.getProfileId().equals([SELECT Id FROM Profile WHERE Name =: 'DEN_Owner']);//checkLoggedUserRights(loggedUserId);
     }
 	
+    public ApexPages.StandardSetController appointmentSetCon {
+        get {
+            return appointmentSetCon == null ? new ApexPages.StandardSetController(Database.getQueryLocator(ownerLogged ? OWNER_LIST : DENTIST_LIST)) : appointmentSetCon;
+        }
+        set;
+    }
+    
     public List<SelectOption> getDentistTypes() {
-        List<SelectOption> result = listInit();
-        return result = addPicklistValues(result, User.Type__c);
+        return addPicklistValues(listInit(), User.Type__c);
     }
     
     public List<SelectOption> getDentists() {
@@ -39,15 +48,28 @@ public class DEN_AppointmentExtension {
     
     public List<SelectOption> getAppointmentTypes() {
         List<SelectOption> result = listInit();
-        for (RecordType rt : [SELECT Id, Name FROM RecordType WHERE SobjectType='DEN_Appointment__c']) {
+        for (RecordType rt : [SELECT Id, Name FROM RecordType WHERE sObjectType = 'DEN_Appointment__c']) {
             result.add(new SelectOption(rt.Id, rt.Name));
         }
         return result;
     }
     
     public List<SelectOption> getStatuses() {
-        List<SelectOption> result = listInit();
-        return result = addPickListValues(result, DEN_Appointment__c.Status__c);
+        return addPickListValues(listInit(), DEN_Appointment__c.Status__c);
+    }
+    
+    public List<AppointmentWrapper> getAppointments() {
+        List<AppointmentWrapper> result = new List<AppointmentWrapper>();
+        for (DEN_Appointment__c appointment : (List<DEN_Appointment__c>) appointmentSetCon.getRecords()) {
+        	//GK: zly pomysl; szybkie uderzenie w limity gwarantowane, w tej petli jest podwojny select dla kazdej wizyty!
+            result.add(new AppointmentWrapper(appointment, getLinkDisplayed(appointment.Id), getApprovalLink(appointment.Id)));
+        }
+		return result;
+    }
+    
+    public PageReference applyFilter() {
+        appointmentSetCon = new ApexPages.StandardSetController(Database.query(getQueryString()));
+        return null;
     }
     
     private List<SelectOption> listInit() {
@@ -72,40 +94,6 @@ public class DEN_AppointmentExtension {
         return ownerIds;
     }
     
-    private static Boolean checkLoggedUserRights(Id loggedUserId) {
-        Boolean result = false;
-        List<Id> ownerIds = getOwners();
-        if (!ownerIds.isEmpty()) {
-            for (Id userElement : ownerIds) {
-                if (userElement.equals(loggedUserId)) {
-                    result = true;
-                    break;
-                }
-            }    
-        }
-        return result;
-    }
-    
-    public ApexPages.StandardSetController appointmentSetCon {
-        get {
-            return appointmentSetCon == null ? new ApexPages.StandardSetController(Database.getQueryLocator(ownerLogged ? OWNER_LIST : DENTIST_LIST)) : appointmentSetCon;
-        }
-        set;
-    }
-    
-    public List<AppointmentWrapper> getAppointments() {
-        List<AppointmentWrapper> result = new List<AppointmentWrapper>();
-        for (DEN_Appointment__c appointment : (List<DEN_Appointment__c>) appointmentSetCon.getRecords()) {
-            result.add(new AppointmentWrapper(appointment, getLinkDisplayed(appointment.Id), getApprovalLink(appointment.Id)));
-        }
-		return result;
-    }
-    
-    public PageReference applyFilter() {
-        appointmentSetCon = new ApexPages.StandardSetController(Database.query(getQueryString()));
-        return null;
-    }
-    
     private String getQueryString() {
         Boolean filterActive = false;
         if (String.isNotBlank(getFilterString(ownerLogged))) {
@@ -114,8 +102,7 @@ public class DEN_AppointmentExtension {
         String result = 'SELECT Id, Name, Patient__c, Dentist__c, Dentist__r.Type__c, DateTime__c, Status__c, RecordTypeId FROM DEN_Appointment__c';
         if (!ownerLogged) {
             result = result + ' WHERE Dentist__c =: loggedUserId' + getFilterString(ownerLogged);
-        }
-        else {
+        } else {
             if (filterActive) {
                 result = result + ' WHERE' + getFilterString(ownerLogged).replaceFirst(' AND', '');
             }
@@ -125,22 +112,12 @@ public class DEN_AppointmentExtension {
     
     private String getFilterString(Boolean owner) {
         String result = '';
-        if (!'ANY'.equals(filteredStatus)) {
-            result = result + ' AND Status__c =: filteredStatus';
-        }
-        if (!'ANY'.equals(filteredClient)) {
-            result = result + ' AND Patient__c =: filteredClient';
-        }
-        if (!'ANY'.equals(filteredType)) {
-            result = result + ' AND RecordTypeId =: filteredType';
-        }
+        result += 'ANY'.equals(filteredStatus) ? '' : ' AND Status__c =: filteredStatus';
+        result += 'ANY'.equals(filteredClient) ? '' : ' AND Patient__c =: filteredClient';
+        result += 'ANY'.equals(filteredType) ? '' : ' AND RecordTypeId =: filteredType';
         if (owner) {
-            if (!'ANY'.equals(filteredDentistType)) {
-                result = result + ' AND Dentist__r.Type__c =: filteredDentistType';
-            }
-            if (!'ANY'.equals(filteredDentist)) {
-                result = result + ' AND Dentist__c =: filteredDentist';
-            }
+        	result += 'ANY'.equals(filteredDentistType) ? '' : ' AND Dentist__r.Type__c =: filteredDentistType';
+        	result += 'ANY'.equals(filteredDentist) ? '' : ' AND Dentist__c =: filteredDentist';
         }
         return result;
     }
@@ -150,6 +127,8 @@ public class DEN_AppointmentExtension {
         for (ProcessInstanceWorkitem item : [SELECT Id, ActorId, ProcessInstanceId FROM ProcessInstanceWorkitem WHERE ProcessInstance.TargetObjectId =: appointment]) {
             retId = item.Id;
         }
+        //GK: https://eu6.salesforce.com <-- to bedzie inne jak wejdziesz na innego orga z kodem. Musisz poczytac jak takie rzeczy sie obsluguje
+        //GK: reszta adresu nadaje na jakis final static String 
         return 'https://eu6.salesforce.com/p/process/ProcessInstanceWorkitemWizardStageManager?id=' + retId;
     }
     
@@ -157,9 +136,8 @@ public class DEN_AppointmentExtension {
         List<ProcessInstanceWorkitem> taskList = [SELECT Id, ActorId, ProcessInstanceId FROM ProcessInstanceWorkitem WHERE ProcessInstance.TargetObjectId =: appointment];
         if (taskList.isEmpty()) {
             return false;
-        }
-        else {
-            return taskList[0].ActorId == loggedUserId ? true : false;
+        } else {
+            return taskList[0].ActorId == loggedUserId;
         }
     }
     
