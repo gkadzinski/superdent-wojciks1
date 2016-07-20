@@ -1,16 +1,14 @@
 public class DEN_AppointmentExtension {
     private static final String OWNER_LIST = 'SELECT Id, Name, Patient__c, Dentist__c, Dentist__r.Type__c, DateTime__c, Status__c, RecordTypeId FROM DEN_Appointment__c';
     private static final String DENTIST_LIST = 'SELECT Id, Name, Patient__c, DateTime__c, Status__c, RecordTypeId FROM DEN_Appointment__c WHERE Dentist__c =: loggedUserId';
-    private static final String OWNER_LIST_DENTIST = 'SELECT Id, Name, Patient__c, Dentist__c, Dentist__r.Type__c, DateTime__c, Status__c, RecordTypeId FROM DEN_Appointment__c WHERE Dentist__c =: filteredDentist';
-    private static final String DENTIST_LIST_CLIENT = 'SELECT Id, Name, Patient__c, DateTime__c, Status__c, RecordTypeId FROM DEN_Appointment__c WHERE Dentist__c =: loggedUserId AND Patient__c =: filteredClient';
     
     public Boolean ownerLogged {get; set;}
     private Id loggedUserId {get; set;}
     public String filteredDentistType {get; set;}
     public String filteredStatus {get; set;}
-    public Id filteredDentist {get; set;}
-    public Id filteredClient {get; set;}
-    public Id filteredType {get; set;}
+    public String filteredDentist {get; set;}
+    public String filteredClient {get; set;}
+    public String filteredType {get; set;}
     
     
     public DEN_AppointmentExtension(ApexPages.StandardController stdController) {
@@ -67,7 +65,7 @@ public class DEN_AppointmentExtension {
     
     private static List<Id> getOwners() {
         List<Id> ownerIds = new List<Id>();
-        //only for testing
+        //only for testing, normally should take all users with profile = DEN_Owner
         ownerIds.add('00558000000VkA5AAK');
         //GK: 00558000000VkDYAA0
         //SW: 00558000000VkA5AAK
@@ -95,16 +93,84 @@ public class DEN_AppointmentExtension {
         set;
     }
     
-    public List<DEN_Appointment__c> getAppointments() {
-		return (List<DEN_Appointment__c>) appointmentSetCon.getRecords();
+    public List<AppointmentWrapper> getAppointments() {
+        List<AppointmentWrapper> result = new List<AppointmentWrapper>();
+        for (DEN_Appointment__c appointment : (List<DEN_Appointment__c>) appointmentSetCon.getRecords()) {
+            result.add(new AppointmentWrapper(appointment, getLinkDisplayed(appointment.Id), getApprovalLink(appointment.Id)));
+        }
+		return result;
     }
     
     public PageReference applyFilter() {
-        appointmentSetCon = new ApexPages.StandardSetController(Database.getQueryLocator(getQueryString()));
+        appointmentSetCon = new ApexPages.StandardSetController(Database.query(getQueryString()));
         return null;
     }
     
     private String getQueryString() {
-        return 'SELECT Id, Name, Patient__c, Dentist__c, Dentist__r.Type__c, DateTime__c, Status__c, RecordTypeId FROM DEN_Appointment__c LIMIT 2';
+        Boolean filterActive = false;
+        if (String.isNotBlank(getFilterString(ownerLogged))) {
+            filterActive = true;
+        }
+        String result = 'SELECT Id, Name, Patient__c, Dentist__c, Dentist__r.Type__c, DateTime__c, Status__c, RecordTypeId FROM DEN_Appointment__c';
+        if (!ownerLogged) {
+            result = result + ' WHERE Dentist__c =: loggedUserId' + getFilterString(ownerLogged);
+        }
+        else {
+            if (filterActive) {
+                result = result + ' WHERE' + getFilterString(ownerLogged).replaceFirst(' AND', '');
+            }
+        }
+        return result;
+    }
+    
+    private String getFilterString(Boolean owner) {
+        String result = '';
+        if (!'ANY'.equals(filteredStatus)) {
+            result = result + ' AND Status__c =: filteredStatus';
+        }
+        if (!'ANY'.equals(filteredClient)) {
+            result = result + ' AND Patient__c =: filteredClient';
+        }
+        if (!'ANY'.equals(filteredType)) {
+            result = result + ' AND RecordTypeId =: filteredType';
+        }
+        if (owner) {
+            if (!'ANY'.equals(filteredDentistType)) {
+                result = result + ' AND Dentist__r.Type__c =: filteredDentistType';
+            }
+            if (!'ANY'.equals(filteredDentist)) {
+                result = result + ' AND Dentist__c =: filteredDentist';
+            }
+        }
+        return result;
+    }
+    
+    private String getApprovalLink(Id appointment) {
+        Id retId;
+        for (ProcessInstanceWorkitem item : [SELECT Id, ActorId, ProcessInstanceId FROM ProcessInstanceWorkitem WHERE ProcessInstance.TargetObjectId =: appointment]) {
+            retId = item.Id;
+        }
+        return 'https://eu6.salesforce.com/p/process/ProcessInstanceWorkitemWizardStageManager?id=' + retId;
+    }
+    
+    private Boolean getLinkDisplayed(Id appointment) {
+        List<ProcessInstanceWorkitem> taskList = [SELECT Id, ActorId, ProcessInstanceId FROM ProcessInstanceWorkitem WHERE ProcessInstance.TargetObjectId =: appointment];
+        if (taskList.isEmpty()) {
+            return false;
+        }
+        else {
+            return taskList[0].ActorId == loggedUserId ? true : false;
+        }
+    }
+    
+    public class AppointmentWrapper {
+        public DEN_Appointment__c appointment {get; set;}
+        public Boolean displayLink {get; set;}
+        public String linkUrl {get; set;}
+        public AppointmentWrapper(DEN_Appointment__c appointment, Boolean displayLink, String linkUrl) {
+            this.appointment = appointment;
+            this.displayLink = displayLink;
+            this.linkUrl = linkUrl;
+        }
     }
 }
