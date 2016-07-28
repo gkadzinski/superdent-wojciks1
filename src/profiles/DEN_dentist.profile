@@ -37,6 +37,10 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>DEN_RestResource</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>DEN_StringUtil</apexClass>
         <enabled>false</enabled>
     </classAccesses>

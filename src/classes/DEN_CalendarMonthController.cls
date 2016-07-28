@@ -110,7 +110,7 @@ public with sharing class DEN_CalendarMonthController {
         return getMultipleElementLimitedResults(result, resultsToRemove);
     }
 
-    private static List<Integer> getSingleElementLimitedResults(List<Integer> result, Integer resultToRemove) {
+    public static List<Integer> getSingleElementLimitedResults(List<Integer> result, Integer resultToRemove) {
         List<Integer> resultList = new List<Integer>();
         Integer startRemove = resultToRemove;
         Integer endRemove = startRemove + 60;
@@ -134,7 +134,7 @@ public with sharing class DEN_CalendarMonthController {
         return resultList;
     }
     
-    private static List<Integer> getMultipleElementLimitedResults(List<Integer> result, List<Integer> resultsToRemove) {
+    public static List<Integer> getMultipleElementLimitedResults(List<Integer> result, List<Integer> resultsToRemove) {
         if (!resultsToRemove.isEmpty()) {
             for (Integer element : resultsToRemove) {
                 result = getSingleElementLimitedResults(result, element);
