@@ -47,16 +47,6 @@ global with sharing class DEN_RestResource {
         }
     }
     
-    private static setError(String msg){
-    	RestContext.response.addHeader('Content-Type', 'application/json');
-        RestContext.response.responseBody = Blob.valueOf(JSON.serializePretty(new BaseResponse(false, msg)));
-    }
-    
-    private static setResponse(Object obj){
-    	RestContext.response.addHeader('Content-Type', 'application/json');
-        RestContext.response.responseBody = Blob.valueOf(JSON.serializePretty(new BaseResponse(true, obj)));
-    }
-    
     //SW TODO: slabo nazwana metoda
     private static List<String> getTimeSlots(List<Integer> avSlots) {
         List<String> result = new List<String>();
@@ -105,6 +95,16 @@ global with sharing class DEN_RestResource {
     
     private static List<DEN_Config__c> getConfigFor(Id dentistId){
     	return [SELECT Id, Name, Weekday__c, Date__c, StartingHour__c, EndingHour__c FROM DEN_Config__c WHERE Dentist__c =: dentistId];
+    }
+    
+    private static setError(String msg){
+    	RestContext.response.addHeader('Content-Type', 'application/json');
+        RestContext.response.responseBody = Blob.valueOf(JSON.serializePretty(new BaseResponse(false, msg)));
+    }
+    
+    private static setResponse(Object obj){
+    	RestContext.response.addHeader('Content-Type', 'application/json');
+        RestContext.response.responseBody = Blob.valueOf(JSON.serializePretty(new BaseResponse(true, obj)));
     }
     
     class BaseResponse {
