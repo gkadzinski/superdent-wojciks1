@@ -7,55 +7,58 @@ global with sharing class DEN_RestResource {
 	@HttpGet
     global static void getDentistData() {
         RestRequest request = RestContext.request;
-        RestResponse response = RestContext.response;
         String requestString = request.requestURI.substring(request.requestURI.lastIndexOf('/')+1);
-        if ('getDentists'.equals(requestString)) {
-            List<User> dentistList = [SELECT Id, Name, Type__c FROM User WHERE Type__c != null];
-            try {
-            	response = addContentToResponse(new BaseResponse(true, dentistList));    
-            } catch (Exception e) {
-                response = addContentToResponse(new BaseResponse(false, e.getMessage()));
-            }
-        } else if ('getDentistDayAvailability'.equals(requestString)) {
-            List<ConfigWrapper> result = new List<ConfigWrapper>();
-            try {
+        
+        try {
+	        if ('getDentists'.equals(requestString)) {
+	           	setResponse([SELECT Id, Name, Type__c FROM User WHERE Type__c != null]);    
+	        } else if ('getDentistDayAvailability'.equals(requestString)) {
+	            List<ConfigWrapper> result = new List<ConfigWrapper>();
+	            //SW TODO: nie zwalidowane czy na pewno parametr przyszedl
+	            Id dentistId = request.params.get('dentistId');
+	            for (DEN_Config__c config : [SELECT Date__c, Weekday__c, StartingHour__c, EndingHour__c FROM DEN_Config__c WHERE Dentist__c =: dentistId]) {
+	                result.add(new ConfigWrapper(config));
+	            }
+	            setResponse(result);
+	        } else if ('getDentistTimeAvailability'.equals(requestString)) {
+	        	//SW TODO: nie zwalidowane czy na pewno parametr przyszedl
                 Id dentistId = request.params.get('dentistId');
-                for (DEN_Config__c config : [SELECT Date__c, Weekday__c, StartingHour__c, EndingHour__c FROM DEN_Config__c WHERE Dentist__c =: dentistId]) {
-                    result.add(new ConfigWrapper(config));
-                }
-                response = addContentToResponse(new BaseResponse(true, result));
-            } catch (Exception e) {
-                response = addContentToResponse(new BaseResponse(false, e.getMessage()));
-            }
-        } else if ('getDentistTimeAvailability'.equals(requestString)) {
-            try {
-                Id dentistId = request.params.get('dentistId');
+                //SW TODO: nie zwalidowane czy na pewno parametr przyszedl
                 Integer reqYear = Integer.valueOf(request.params.get('year'));
+                //SW TODO: nie zwalidowane czy na pewno parametr przyszedl
                 Integer reqMonth = Integer.valueOf(request.params.get('month'));
+                //SW TODO: nie zwalidowane czy na pewno parametr przyszedl
                 Integer reqDay = Integer.valueOf(request.params.get('day'));
                 Date requestDate = Date.newInstance(reqYear, reqMonth, reqDay);
-                if (reqYear > 2099 || reqMonth > 12 || reqMonth ==0 || reqDay ==0 || reqDay > 31) {
-                    response = addContentToResponse(new BaseResponse(false, REST_ERROR_INCORRECT_DATE_PARAM));
+				
+				//SW TODO: slaba walidacja, nie wiadomo co jest bledne; komunikat musi byc jasny; hint: wydziel sprawdzanie do metody przy okazji
+                if (reqYear>2099 || reqMonth>12 || reqMonth==0 || reqDay==0 || reqDay>31) {
+                    setError(REST_ERROR_INCORRECT_DATE_PARAM);
                 } else if (requestDate < Date.today()) {
-                    response = addContentToResponse(new BaseResponse(false, REST_ERROR_INCORRECT_DATE));
+                    setError(REST_ERROR_INCORRECT_DATE);
                 } else {
-                    response = addContentToResponse(new BaseResponse(true, getTimeSlots(getAvailableSlots(requestDate, dentistId))));
+                    setResponse(getTimeSlots(getAvailableSlots(requestDate, dentistId)));
                 }
-            } catch (Exception e) {
-                response = addContentToResponse(new BaseResponse(false, e.getMessage()));
-            }
-        } else {
-            response = addContentToResponse(new BaseResponse(false, REST_ERROR_INCORRECT_URI));
+	        } else {
+	            setError(REST_ERROR_INCORRECT_URI);
+	        }
+        } catch (Exception e) {
+            setError(e.getMessage());
         }
     }
     
-    public static RestResponse addContentToResponse(BaseResponse br) {
-        RestContext.response.addHeader('Content-Type', 'application/json');
-        RestContext.response.responseBody = Blob.valueOf(JSON.serializePretty(br));
-        return RestContext.response;
+    private static setError(String msg){
+    	RestContext.response.addHeader('Content-Type', 'application/json');
+        RestContext.response.responseBody = Blob.valueOf(JSON.serializePretty(new BaseResponse(false, msg)));
     }
     
-    public static List<String> getTimeSlots(List<Integer> avSlots) {
+    private static setResponse(Object obj){
+    	RestContext.response.addHeader('Content-Type', 'application/json');
+        RestContext.response.responseBody = Blob.valueOf(JSON.serializePretty(new BaseResponse(true, obj)));
+    }
+    
+    //SW TODO: slabo nazwana metoda
+    private static List<String> getTimeSlots(List<Integer> avSlots) {
         List<String> result = new List<String>();
         for (Integer i=0; i<24; i++) {
             Integer startTime = i*60;
@@ -71,7 +74,7 @@ global with sharing class DEN_RestResource {
         return result;
     }
     
-    public static List<Integer> getAvailableSlots(Date requestDate, ID dentistId) {
+    private static List<Integer> getAvailableSlots(Date requestDate, ID dentistId) {
         List<Integer> result = new List<Integer>();
         List<Integer> resultsToRemove = new List<Integer>();
         String selDateWeekDay = DEN_DateUtil.getWeekdayFrom(requestDate);
@@ -86,28 +89,24 @@ global with sharing class DEN_RestResource {
         if (!dateConfig) {
             result.clear();
             for (DEN_Config__c config : [SELECT Id, Name, Weekday__c, Date__c, StartingHour__c, EndingHour__c FROM DEN_Config__c WHERE Dentist__c =: dentistId]) {
+            	//SW TODO: equalsIgnoreCase bylby lepszy
                 if (config.Weekday__c != null && config.Weekday__c.equals(selDateWeekDay.toUpperCase())) {
                     result.add(Integer.valueOf(config.StartingHour__c));
                     result.add(Integer.valueOf(config.EndingHour__c));
                 }
             }
         }
-        List<DEN_Appointment__c> slotsWithVisits = [SELECT DateTime__c FROM DEN_Appointment__c WHERE Date__c =: requestDate and Dentist__c =: dentistId and Status__c != 'Odrzucona'];
-        if (!slotsWithVisits.isEmpty()) {
-            for (DEN_Appointment__c appointment : slotsWithVisits) {
-                resultsToRemove.add(appointment.DateTime__c.hour()*60);
-            }
+        //SW TODO: statusy lepiej trzymac gdzies jako stale i korzystac wszedzie gdzie sie da
+        for (DEN_Appointment__c appointment : [SELECT DateTime__c FROM DEN_Appointment__c WHERE Date__c =: requestDate and Dentist__c =: dentistId and Status__c != 'Odrzucona']) {
+            resultsToRemove.add(appointment.DateTime__c.hour()*60);
         }
         return DEN_CalendarMonthController.getMultipleElementLimitedResults(result, resultsToRemove);
     }
     
-    public class BaseResponse {
+    class BaseResponse {
         public Boolean status;
         public String message;
         public Object response;
-        
-        public BaseResponse() {
-        }
         
         public BaseResponse(Boolean status, String message) {
             this.status = status;
@@ -120,7 +119,7 @@ global with sharing class DEN_RestResource {
         }
     }
     
-    public class ConfigWrapper {
+    class ConfigWrapper {
         public String timePeriod {get; set;}
         public String weekday {get; set;}
         public Date configDate {get; set;}
