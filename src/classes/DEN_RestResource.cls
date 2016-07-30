@@ -16,7 +16,7 @@ global with sharing class DEN_RestResource {
 	            List<ConfigWrapper> result = new List<ConfigWrapper>();
 	            //SW TODO: nie zwalidowane czy na pewno parametr przyszedl
 	            Id dentistId = request.params.get('dentistId');
-	            for (DEN_Config__c config : [SELECT Date__c, Weekday__c, StartingHour__c, EndingHour__c FROM DEN_Config__c WHERE Dentist__c =: dentistId]) {
+	            for (DEN_Config__c config : getConfigFor(dentistId)) {
 	                result.add(new ConfigWrapper(config));
 	            }
 	            setResponse(result);
@@ -74,13 +74,13 @@ global with sharing class DEN_RestResource {
         return result;
     }
     
-    private static List<Integer> getAvailableSlots(Date requestDate, ID dentistId) {
+    private static List<Integer> getAvailableSlots(Date requestDate, Id dentistId) {
         List<Integer> result = new List<Integer>();
         List<Integer> resultsToRemove = new List<Integer>();
         String selDateWeekDay = DEN_DateUtil.getWeekdayFrom(requestDate);
         Boolean dateConfig = false;
-        for (DEN_Config__c config : [SELECT Id, Name, Weekday__c, Date__c, StartingHour__c, EndingHour__c FROM DEN_Config__c WHERE Dentist__c =: dentistId]) {
-            if (config.Date__c != null && config.Date__c == requestDate) {
+        for (DEN_Config__c config : getConfigFor(dentistId)) {
+            if (requestDate == config.Date__c) {
                 dateConfig = true;
                 result.add(Integer.valueOf(config.StartingHour__c));
                 result.add(Integer.valueOf(config.EndingHour__c));
@@ -88,7 +88,7 @@ global with sharing class DEN_RestResource {
         }
         if (!dateConfig) {
             result.clear();
-            for (DEN_Config__c config : [SELECT Id, Name, Weekday__c, Date__c, StartingHour__c, EndingHour__c FROM DEN_Config__c WHERE Dentist__c =: dentistId]) {
+            for (DEN_Config__c config : getConfigFor(dentistId)) {
             	//SW TODO: equalsIgnoreCase bylby lepszy
                 if (config.Weekday__c != null && config.Weekday__c.equals(selDateWeekDay.toUpperCase())) {
                     result.add(Integer.valueOf(config.StartingHour__c));
@@ -101,6 +101,10 @@ global with sharing class DEN_RestResource {
             resultsToRemove.add(appointment.DateTime__c.hour()*60);
         }
         return DEN_CalendarMonthController.getMultipleElementLimitedResults(result, resultsToRemove);
+    }
+    
+    private static List<DEN_Config__c> getConfigFor(Id dentistId){
+    	return [SELECT Id, Name, Weekday__c, Date__c, StartingHour__c, EndingHour__c FROM DEN_Config__c WHERE Dentist__c =: dentistId];
     }
     
     class BaseResponse {
