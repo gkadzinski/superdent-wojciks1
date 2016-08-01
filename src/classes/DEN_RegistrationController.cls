@@ -59,8 +59,7 @@ public with sharing class DEN_RegistrationController {
     private String getQueryString() {
         if ('ANY'.equals(dentistType)) {
         	return appointment.Date__c == null ? ALL_DENTISTS : FILTERED_DATE;
-        }
-        else {
+        } else {
             return appointment.Date__c == null ? FILTERED_DENTISTS : FILTERED_DENTISTS_DATE;
     	}
     }
@@ -71,8 +70,7 @@ public with sharing class DEN_RegistrationController {
         if (contactsMatched.isEmpty()) {
             insert contact;
             appointment.Patient__c = contact.Id;
-        }
-        else {
+        } else {
             contactsMatched[0].FirstName = contact.FirstName;
             contactsMatched[0].LastName = contact.LastName;
             contactsMatched[0].Phone = appointment.Telephone__c;
@@ -86,7 +84,7 @@ public with sharing class DEN_RegistrationController {
         return null;
     }
     
-    private String getDefaultStatus() {
+    public static String getDefaultStatus() {
         for (Schema.PicklistEntry value : DEN_Appointment__c.Status__c.getDescribe().getPicklistValues()) {
             if (value.isDefaultValue()) {
                 return value.getValue();

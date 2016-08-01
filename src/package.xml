@@ -51,6 +51,7 @@
         <name>Layout</name>
     </types>
     <types>
+        <members>DEN_Owner</members>
         <members>DEN_Superdent Profile</members>
         <members>DEN_dentist</members>
         <name>Profile</name>
