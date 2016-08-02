@@ -17,15 +17,16 @@ global with sharing class DEN_RestResource {
     @HttpGet
     global static void getDentistData() {
         RestRequest request = RestContext.request;
-        String requestString = request.requestURI.substring(request.requestURI.lastIndexOf('/')+1);
+        Map<String, String> params = request.params;
+        String action = request.requestURI.substring(request.requestURI.lastIndexOf('/')+1);
         
         try {
-            if ('getDentists'.equals(requestString)) {
+            if ('getDentists'.equals(action)) {
                 setResponse([SELECT Id, Name, Type__c FROM User WHERE Type__c != null]);    
-            } else if ('getDentistDayAvailability'.equals(requestString)) {
-                if (request.params.containsKey('dentistId')) {
+            } else if ('getDentistDayAvailability'.equals(action)) {
+                if (params.containsKey('dentistId')) {
                     List<ConfigWrapper> result = new List<ConfigWrapper>();
-                    Id dentistId = request.params.get('dentistId');
+                    Id dentistId = params.get('dentistId');
                     for (DEN_Config__c config : getConfigFor(dentistId)) {
                         result.add(new ConfigWrapper(config));
                     }
@@ -33,12 +34,12 @@ global with sharing class DEN_RestResource {
                 } else {
                     setError(REST_ERROR_MISSING_PARAMETERS);
                 }
-            } else if ('getDentistTimeAvailability'.equals(requestString)) {
-                if (request.params.containsKey('dentistId') && request.params.containsKey('year') && request.params.containsKey('month') && request.params.containsKey('day')) {
-                    Id dentistId = request.params.get('dentistId');
-                    Integer reqYear = Integer.valueOf(request.params.get('year'));
-                    Integer reqMonth = Integer.valueOf(request.params.get('month'));
-                    Integer reqDay = Integer.valueOf(request.params.get('day'));
+            } else if ('getDentistTimeAvailability'.equals(action)) {
+                if (params.containsKey('dentistId') && params.containsKey('year') && params.containsKey('month') && params.containsKey('day')) {
+                    Id dentistId = params.get('dentistId');
+                    Integer reqYear = Integer.valueOf(params.get('year'));
+                    Integer reqMonth = Integer.valueOf(params.get('month'));
+                    Integer reqDay = Integer.valueOf(params.get('day'));
                     if (validateDateInput(reqYear, reqMonth, reqDay)) {
                         Date requestDate = Date.newInstance(reqYear, reqMonth, reqDay);
                         setResponse(getAvailableTime(getAvailableConfig(requestDate, dentistId)));
@@ -66,7 +67,7 @@ global with sharing class DEN_RestResource {
                     setError(REST_ERROR_EMPTY_CONTACT_PARAM);
                 } else if (String.isBlank(contactEmail) || !validateEmail(contactEmail)) {
                     setError(REST_ERROR_INCORRECT_EMAIL);
-                } else if (verifyAppointmentTime(dentistId, DateTime.newInstance(Date.newInstance(year, month, day), Time.newInstance(appointmentTime, 0, 0, 0)))) {
+                } else if (verifyAppointmentTime(dentistId, /* w sam raz do przeniesienia do DEN_DateUtil -> */ DateTime.newInstance(Date.newInstance(year, month, day), Time.newInstance(appointmentTime, 0, 0, 0)))) {
                     setError(REST_ERROR_APPOINTMENT_NOT_AVAILABLE);
                 } else {
                     Date requestDate = Date.newInstance(year, month, day);
