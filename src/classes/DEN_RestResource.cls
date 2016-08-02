@@ -12,6 +12,7 @@ global with sharing class DEN_RestResource {
     private static String REST_ERROR_WRONG_MONTH = 'Month parameter is not valid, should be between 1 and 12';
     private static String REST_ERROR_WRONG_DAY = 'Day number exceeds the number of days in given month/year';
     private static String REST_ERROR_INCORRECT_EMAIL = 'email parameter is empty or invalid';
+    private static String REST_ERROR_APPOINTMENT_NOT_AVAILABLE = 'this time for appointment is not available';
 
     @HttpGet
     global static void getDentistData() {
@@ -65,6 +66,8 @@ global with sharing class DEN_RestResource {
                     setError(REST_ERROR_EMPTY_CONTACT_PARAM);
                 } else if (String.isBlank(contactEmail) || !validateEmail(contactEmail)) {
                     setError(REST_ERROR_INCORRECT_EMAIL);
+                } else if (verifyAppointmentTime(dentistId, DateTime.newInstance(Date.newInstance(year, month, day), Time.newInstance(appointmentTime, 0, 0, 0)))) {
+                    setError(REST_ERROR_APPOINTMENT_NOT_AVAILABLE);
                 } else {
                     Date requestDate = Date.newInstance(year, month, day);
                     DEN_Appointment__c appointment = new DEN_Appointment__c();
@@ -139,6 +142,23 @@ global with sharing class DEN_RestResource {
         } else {
             return true;
         }
+    }
+    
+    private static Boolean verifyAppointmentTime(Id dentistId, DateTime appointmentTime) {
+        Boolean result = true;
+        List<String> avList = getAvailableTime(getAvailableConfig(appointmentTime.date(), dentistId));
+        if (avList.isEmpty()) {
+            return true;
+        } else {
+            for (String appointmentPeriod : avList) {
+                Integer startTime = appointmentTime.hour() * 60;
+                Integer endTime = startTime + 60;
+                if (appointmentPeriod.equals(DEN_HoursConverterController.getPeriodString(startTime, endTime))) {
+                    return false;
+                }
+            }    
+        }
+        return result;
     }
     
     public static List<String> getAvailableTime(List<Integer> avSlots) {
