@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Profile xmlns="http://soap.sforce.com/2006/04/metadata">
     <classAccesses>
-        <apexClass>ChangePasswordController</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>ChangePasswordControllerTest</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
         <apexClass>DEN_AppointmentExtension</apexClass>
         <enabled>false</enabled>
     </classAccesses>
@@ -33,6 +25,10 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>DEN_IntegrationUtils</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>DEN_RegistrationController</apexClass>
         <enabled>false</enabled>
     </classAccesses>
@@ -41,39 +37,11 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>DEN_SoapResource</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>DEN_StringUtil</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>ForgotPasswordController</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>ForgotPasswordControllerTest</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>MyProfilePageController</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>MyProfilePageControllerTest</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>SiteLoginController</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>SiteLoginControllerTest</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>SiteRegisterController</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>SiteRegisterControllerTest</apexClass>
         <enabled>false</enabled>
     </classAccesses>
     <custom>true</custom>
@@ -132,11 +100,6 @@
         <field>DEN_Config__c.Weekday__c</field>
         <readable>true</readable>
     </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>User.Type__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
     <layoutAssignments>
         <layout>DEN_Appointment__c-DEN_Appointment Layout</layout>
     </layoutAssignments>
@@ -152,18 +115,6 @@
         <layout>DEN_Config__c-DEN_Config Layout</layout>
     </layoutAssignments>
     <pageAccesses>
-        <apexPage>AnswersHome</apexPage>
-        <enabled>false</enabled>
-    </pageAccesses>
-    <pageAccesses>
-        <apexPage>BandwidthExceeded</apexPage>
-        <enabled>false</enabled>
-    </pageAccesses>
-    <pageAccesses>
-        <apexPage>ChangePassword</apexPage>
-        <enabled>false</enabled>
-    </pageAccesses>
-    <pageAccesses>
         <apexPage>DEN_Appointment</apexPage>
         <enabled>false</enabled>
     </pageAccesses>
@@ -177,62 +128,6 @@
     </pageAccesses>
     <pageAccesses>
         <apexPage>DEN_Registration</apexPage>
-        <enabled>false</enabled>
-    </pageAccesses>
-    <pageAccesses>
-        <apexPage>Exception</apexPage>
-        <enabled>false</enabled>
-    </pageAccesses>
-    <pageAccesses>
-        <apexPage>FileNotFound</apexPage>
-        <enabled>false</enabled>
-    </pageAccesses>
-    <pageAccesses>
-        <apexPage>ForgotPassword</apexPage>
-        <enabled>false</enabled>
-    </pageAccesses>
-    <pageAccesses>
-        <apexPage>ForgotPasswordConfirm</apexPage>
-        <enabled>false</enabled>
-    </pageAccesses>
-    <pageAccesses>
-        <apexPage>IdeasHome</apexPage>
-        <enabled>false</enabled>
-    </pageAccesses>
-    <pageAccesses>
-        <apexPage>InMaintenance</apexPage>
-        <enabled>false</enabled>
-    </pageAccesses>
-    <pageAccesses>
-        <apexPage>MyProfilePage</apexPage>
-        <enabled>false</enabled>
-    </pageAccesses>
-    <pageAccesses>
-        <apexPage>SiteLogin</apexPage>
-        <enabled>false</enabled>
-    </pageAccesses>
-    <pageAccesses>
-        <apexPage>SiteRegister</apexPage>
-        <enabled>false</enabled>
-    </pageAccesses>
-    <pageAccesses>
-        <apexPage>SiteRegisterConfirm</apexPage>
-        <enabled>false</enabled>
-    </pageAccesses>
-    <pageAccesses>
-        <apexPage>SiteTemplate</apexPage>
-        <enabled>false</enabled>
-    </pageAccesses>
-    <pageAccesses>
-        <apexPage>StdExceptionTemplate</apexPage>
-        <enabled>false</enabled>
-    </pageAccesses>
-    <pageAccesses>
-        <apexPage>Unauthorized</apexPage>
-        <enabled>false</enabled>
-    </pageAccesses>
-    <pageAccesses>
-        <apexPage>UnderConstruction</apexPage>
         <enabled>false</enabled>
     </pageAccesses>
     <recordTypeVisibilities>

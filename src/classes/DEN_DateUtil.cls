@@ -11,6 +11,10 @@ public class DEN_DateUtil {
         return DateTime.newInstance(selDate, Time.newInstance(0, 0, 0, 0));
     }
     
+    public static DateTime getDateTime(Integer year, Integer month, Integer day, Integer hour) {
+        return DateTime.newInstance(Date.newInstance(year, month, day), Time.newInstance(hour, 0, 0, 0));
+    }    
+    
     public static Integer getDaysInMonthCount(Date displayedMonth) {
         return Date.daysInMonth(displayedMonth.year(), displayedMonth.month());
     }

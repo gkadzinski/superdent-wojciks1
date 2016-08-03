@@ -1,15 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
-        <members>*</members>
+        <members>DEN_AppointmentExtension</members>
+        <members>DEN_CalendarMonthController</members>
+        <members>DEN_ClientExtension</members>
+        <members>DEN_ConfigController</members>
+        <members>DEN_DateUtil</members>
+        <members>DEN_HoursConverterController</members>
+        <members>DEN_IntegrationUtils</members>
+        <members>DEN_RegistrationController</members>
+        <members>DEN_RestResource</members>
+        <members>DEN_SoapResource</members>
+        <members>DEN_StringUtil</members>
         <name>ApexClass</name>
     </types>
     <types>
-        <members>*</members>
+        <members>DEN_CalendarMonth</members>
+        <members>DEN_DisplayConvertedHours</members>
         <name>ApexComponent</name>
     </types>
     <types>
-        <members>*</members>
+        <members>DEN_Appointment</members>
+        <members>DEN_Client</members>
+        <members>DEN_Config</members>
+        <members>DEN_Registration</members>
         <name>ApexPage</name>
     </types>
     <types>
@@ -22,8 +36,11 @@
     </types>
     <types>
         <members>*</members>
-        <members>User</members>
         <name>CustomObject</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>CustomObjectTranslation</name>
     </types>
     <types>
         <members>*</members>
@@ -51,13 +68,17 @@
         <name>Layout</name>
     </types>
     <types>
+        <members>*</members>
+        <name>PermissionSet</name>
+    </types>
+    <types>
         <members>DEN_Owner</members>
         <members>DEN_Superdent Profile</members>
         <members>DEN_dentist</members>
         <name>Profile</name>
     </types>
     <types>
-        <members>*</members>
+        <members>DEN_spinner</members>
         <name>StaticResource</name>
     </types>
     <types>

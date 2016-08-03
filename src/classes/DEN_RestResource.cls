@@ -4,7 +4,7 @@ global with sharing class DEN_RestResource {
     private static String REST_ERROR_DATE_IN_PAST = 'Requested date is in the past';
     private static String REST_ERROR_MISSING_DATE_PARAM_VALUES = 'Values for date parameters should not be empty';
     private static String REST_ERROR_TIME_PARAMETER = 'Time parameter is empty or invalid';
-    private static String REST_ERROR_EMPTY_PARAM_DENTIST = 'dentistId parameter is empty';
+    private static String REST_ERROR_EMPTY_PARAM_DENTIST = 'dentistId parameter is empty or invalid';
     private static String REST_ERROR_EMPTY_CONTACT_PARAM = 'Contact parameter is not provided, check: contactFirst, contactLast, contactPhone';
     private static String REST_ERROR_EMPTY_PARAM = 'Please provide all fields for appointment';
     private static String REST_ERROR_MISSING_PARAMETERS = 'There are missing required parameters in the URI';
@@ -22,15 +22,11 @@ global with sharing class DEN_RestResource {
         
         try {
             if ('getDentists'.equals(action)) {
-                setResponse([SELECT Id, Name, Type__c FROM User WHERE Type__c != null]);    
+                setResponse(Database.query(DEN_IntegrationUtils.ALL_DENTISTS));
             } else if ('getDentistDayAvailability'.equals(action)) {
                 if (params.containsKey('dentistId')) {
-                    List<ConfigWrapper> result = new List<ConfigWrapper>();
                     Id dentistId = params.get('dentistId');
-                    for (DEN_Config__c config : getConfigFor(dentistId)) {
-                        result.add(new ConfigWrapper(config));
-                    }
-                    setResponse(result);
+                    setResponse(DEN_IntegrationUtils.setDentistDayAvailabilityResult(dentistId));
                 } else {
                     setError(REST_ERROR_MISSING_PARAMETERS);
                 }
@@ -67,7 +63,7 @@ global with sharing class DEN_RestResource {
                     setError(REST_ERROR_EMPTY_CONTACT_PARAM);
                 } else if (String.isBlank(contactEmail) || !validateEmail(contactEmail)) {
                     setError(REST_ERROR_INCORRECT_EMAIL);
-                } else if (verifyAppointmentTime(dentistId, /* w sam raz do przeniesienia do DEN_DateUtil -> */ DateTime.newInstance(Date.newInstance(year, month, day), Time.newInstance(appointmentTime, 0, 0, 0)))) {
+                } else if (verifyAppointmentTime(dentistId, DEN_DateUtil.getDateTime(year, month, day, appointmentTime))) {
                     setError(REST_ERROR_APPOINTMENT_NOT_AVAILABLE);
                 } else {
                     Date requestDate = Date.newInstance(year, month, day);
@@ -208,44 +204,13 @@ global with sharing class DEN_RestResource {
         return DEN_CalendarMonthController.getMultipleElementLimitedResults(result, resultsToRemove);
     }
     
-    private static List<DEN_Config__c> getConfigFor(Id dentistId) {
-        return [SELECT Id, Name, Weekday__c, Date__c, StartingHour__c, EndingHour__c FROM DEN_Config__c WHERE Dentist__c =: dentistId];
-    }
-    
     private static void setError(String msg) {
         RestContext.response.addHeader('Content-Type', 'application/json');
-        RestContext.response.responseBody = Blob.valueOf(JSON.serializePretty(new BaseResponse(false, msg)));
+        RestContext.response.responseBody = Blob.valueOf(JSON.serializePretty(new DEN_IntegrationUtils.BaseResponse(false, msg)));
     }
     
     private static void setResponse(Object obj) {
         RestContext.response.addHeader('Content-Type', 'application/json');
-        RestContext.response.responseBody = Blob.valueOf(JSON.serializePretty(new BaseResponse(true, obj)));
-    }    
-    
-    public class BaseResponse {
-        public Boolean status;
-        public String message;
-        public Object response;
-        
-        public BaseResponse(Boolean status, String message) {
-            this.status = status;
-            this.message = message;
-        }
-        
-        public BaseResponse(Boolean status, Object response) {
-            this.status = status;
-            this.response = response;
-        }
-    }
-    
-    public class ConfigWrapper {
-        public String timePeriod {get; set;}
-        public String weekday {get; set;}
-        public Date configDate {get; set;}
-        public ConfigWrapper(DEN_Config__c config) {
-            this.timePeriod = DEN_HoursConverterController.getPeriodString(Integer.valueOf(config.StartingHour__c), Integer.valueOf(config.EndingHour__c));
-            this.weekday = config.Weekday__c;
-            this.configDate = config.Date__c;
-        }
+        RestContext.response.responseBody = Blob.valueOf(JSON.serializePretty(new DEN_IntegrationUtils.BaseResponse(true, obj)));
     }
 }
