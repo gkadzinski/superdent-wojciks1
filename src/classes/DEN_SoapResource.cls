@@ -1,22 +1,40 @@
 global class DEN_SoapResource {
-    webservice static DEN_IntegrationUtils.BaseResponse getDentists() {
-        return addResponse(Database.query(DEN_IntegrationUtils.ALL_DENTISTS));
+    webservice static DentistsResponse getDentists() {
+        return new DentistsResponse(true, Database.query(DEN_IntegrationUtils.ALL_DENTISTS));
     }
     
-    webservice static DEN_IntegrationUtils.BaseResponse getDentistDayAvailability(String dentist) {
+    webservice static DentistTimeAvailabilityResponse getDentistTimeAvailability(String dentist) {
         try {
             Id dentistId = dentist;
-            return addResponse(DEN_IntegrationUtils.setDentistDayAvailabilityResult(dentistId));
+            return new DentistTimeAvailabilityResponse(true, DEN_IntegrationUtils.setDentistDayAvailabilityResult(dentistId));
         } catch (Exception e) {
-            return addError(e.getMessage());
+            return new DentistTimeAvailabilityResponse(false, e.getMessage());
+        }
+    }
+	
+    global class DentistsResponse {
+        webservice Boolean status;
+        webservice List<User> response;
+        
+        global DentistsResponse(Boolean status, List<User> response) {
+            this.status = status;
+            this.response = response;
         }
     }
     
-    private static DEN_IntegrationUtils.BaseResponse addResponse(Object obj) {
-        return new DEN_IntegrationUtils.BaseResponse(true, obj);
-    }
-    
-    private static DEN_IntegrationUtils.BaseResponse addError(String msg) {
-        return new DEN_IntegrationUtils.BaseResponse(false, msg);
+    global class DentistTimeAvailabilityResponse {
+        webservice Boolean status;
+        webservice String message;
+        webservice List<DEN_IntegrationUtils.ConfigWrapper> response;
+        
+        global DentistTimeAvailabilityResponse(Boolean status, List<DEN_IntegrationUtils.ConfigWrapper> response) {
+            this.status = status;
+            this.response = response;
+        }
+        
+        global DentistTimeAvailabilityResponse(Boolean status, String message) {
+            this.status = status;
+            this.message = message;
+        }
     }
 }

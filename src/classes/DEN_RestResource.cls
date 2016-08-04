@@ -206,11 +206,27 @@ global with sharing class DEN_RestResource {
     
     private static void setError(String msg) {
         RestContext.response.addHeader('Content-Type', 'application/json');
-        RestContext.response.responseBody = Blob.valueOf(JSON.serializePretty(new DEN_IntegrationUtils.BaseResponse(false, msg)));
+        RestContext.response.responseBody = Blob.valueOf(JSON.serializePretty(new BaseResponse(false, msg)));
     }
     
     private static void setResponse(Object obj) {
         RestContext.response.addHeader('Content-Type', 'application/json');
-        RestContext.response.responseBody = Blob.valueOf(JSON.serializePretty(new DEN_IntegrationUtils.BaseResponse(true, obj)));
+        RestContext.response.responseBody = Blob.valueOf(JSON.serializePretty(new BaseResponse(true, obj)));
+    }
+    
+    public class BaseResponse {
+        public Boolean status;
+        public String message;
+        public Object response;
+        
+        public BaseResponse(Boolean status, String message) {
+            this.status = status;
+            this.message = message;
+        }
+        
+        public BaseResponse(Boolean status, Object response) {
+            this.status = status;
+            this.response = response;
+        }
     }
 }

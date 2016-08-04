@@ -12,22 +12,6 @@ global class DEN_IntegrationUtils {
         }
     }
     
-    global class BaseResponse {
-        public Boolean status;
-        public String message;
-        public Object response;
-        
-        public BaseResponse(Boolean status, String message) {
-            this.status = status;
-            this.message = message;
-        }
-        
-        public BaseResponse(Boolean status, Object response) {
-            this.status = status;
-            this.response = response;
-        }
-    }    
-    
     private static List<DEN_Config__c> getConfigFor(Id dentistId) {
         return [SELECT Id, Name, Weekday__c, Date__c, StartingHour__c, EndingHour__c FROM DEN_Config__c WHERE Dentist__c =: dentistId];
     }
@@ -39,5 +23,4 @@ global class DEN_IntegrationUtils {
         }
         return result;
     }
-    
 }
