@@ -1,12 +1,12 @@
-global class DEN_IntegrationUtils {
-    global static String ALL_DENTISTS = 'SELECT Id, Name, Type__c FROM User WHERE Type__c != null';
-    global static String APOINTMENT_STATUS_REJECTED = 'Odrzucona';
+public class DEN_IntegrationUtils {
+    public static String ALL_DENTISTS = 'SELECT Id, Name, Type__c FROM User WHERE Type__c != null';
+    public static String APOINTMENT_STATUS_REJECTED = 'Odrzucona';
     private static String REST_ERROR_MISSING_DATE_PARAM_VALUES = 'Values for date parameters should not be empty';
     private static String REST_ERROR_WRONG_MONTH = 'Month parameter is not valid, should be between 1 and 12';
     private static String REST_ERROR_WRONG_DAY = 'Day number exceeds the number of days in given month/year';
     private static String REST_ERROR_DATE_IN_PAST = 'Requested date is in the past';
     
-    global class ConfigWrapper {
+    public class ConfigWrapper {
         public String timePeriod {get; set;}
         public String weekday {get; set;}
         public Date configDate {get; set;}
@@ -17,11 +17,11 @@ global class DEN_IntegrationUtils {
         }
     }
     
-    global class ValidateEmail {
+    public class ValidateResult {
         public Boolean status {get; set;}
         public String error {get; set;}
         
-        public ValidateEmail(Boolean status, String error) {
+        public ValidateResult(Boolean status, String error) {
             this.status = status;
             this.error = error;
         }
@@ -31,7 +31,7 @@ global class DEN_IntegrationUtils {
         return [SELECT Id, Name, Weekday__c, Date__c, StartingHour__c, EndingHour__c FROM DEN_Config__c WHERE Dentist__c =: dentistId];
     }
     
-    global static List<ConfigWrapper> setDentistDayAvailabilityResult(Id dentistId) {
+    public static List<ConfigWrapper> setDentistDayAvailabilityResult(Id dentistId) {
         List<ConfigWrapper> result = new List<ConfigWrapper>();
         for (DEN_Config__c config : getConfigFor(dentistId)) {
             result.add(new ConfigWrapper(config));
@@ -39,7 +39,7 @@ global class DEN_IntegrationUtils {
         return result;
     }
     
-    global static List<String> getAvailableTime(List<Integer> avSlots) {
+    public static List<String> getAvailableTime(List<Integer> avSlots) {
         List<String> result = new List<String>();
         for (Integer i=0; i<24; i++) {
             Integer startTime = i*60;
@@ -55,7 +55,7 @@ global class DEN_IntegrationUtils {
         return result;
     }
     
-    global static List<Integer> getAvailableConfig(Date requestDate, ID dentistId) {
+    public static List<Integer> getAvailableConfig(Date requestDate, ID dentistId) {
         List<Integer> result = new List<Integer>();
         List<Integer> resultsToRemove = new List<Integer>();
         String selDateWeekDay = DEN_DateUtil.getWeekdayFrom(requestDate);
@@ -85,7 +85,7 @@ global class DEN_IntegrationUtils {
         return DEN_CalendarMonthController.getMultipleElementLimitedResults(result, resultsToRemove);
     }
     
-    global static Boolean verifyAppointmentTime(Id dentistId, DateTime appointmentTime) {
+    public static Boolean verifyAppointmentTime(Id dentistId, DateTime appointmentTime) {
         Boolean result = true;
         List<String> avList = getAvailableTime(getAvailableConfig(appointmentTime.date(), dentistId));
         if (avList.isEmpty()) {
@@ -102,7 +102,7 @@ global class DEN_IntegrationUtils {
         return result;
     }
     
-    global static Boolean validateEmail(String email) {
+    public static Boolean ValidateResult(String email) {
         Boolean result = false;
         String emailRegex = '^[a-zA-Z0-9._|\\\\%#~`=?&/$^*!}{+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}$';
         Matcher myMatcher = Pattern.compile(emailRegex).matcher(email);
@@ -112,18 +112,18 @@ global class DEN_IntegrationUtils {
         return result;
     }
     
-    global static ValidateEmail validateDateInput(Integer year, Integer month, Integer day) {
+    public static ValidateResult validateDateInput(Integer year, Integer month, Integer day) {
         Date givenDate = Date.newInstance(year, month, day);
         if (year == null || month == null || day == null) {
-            return new ValidateEmail(false, REST_ERROR_MISSING_DATE_PARAM_VALUES);
+            return new ValidateResult(false, REST_ERROR_MISSING_DATE_PARAM_VALUES);
         } else if (month > 12 || month <= 0) {
-            return new ValidateEmail(false, REST_ERROR_WRONG_MONTH);
+            return new ValidateResult(false, REST_ERROR_WRONG_MONTH);
         } else if (day > Date.daysInMonth(year, month)) {
-            return new ValidateEmail(false, REST_ERROR_WRONG_DAY);
+            return new ValidateResult(false, REST_ERROR_WRONG_DAY);
         } else if (givenDate < Date.today()) {
-            return new ValidateEmail(false, REST_ERROR_DATE_IN_PAST);
+            return new ValidateResult(false, REST_ERROR_DATE_IN_PAST);
         } else {
-            return new ValidateEmail(true, '');
+            return new ValidateResult(true, '');
         }
     }
 }
