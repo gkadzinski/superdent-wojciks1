@@ -1,10 +1,15 @@
 public class DEN_IntegrationUtils {
     public static String ALL_DENTISTS = 'SELECT Id, Name, Type__c FROM User WHERE Type__c != null';
     public static String APOINTMENT_STATUS_REJECTED = 'Odrzucona';
-    private static String REST_ERROR_MISSING_DATE_PARAM_VALUES = 'Values for date parameters should not be empty';
-    private static String REST_ERROR_WRONG_MONTH = 'Month parameter is not valid, should be between 1 and 12';
-    private static String REST_ERROR_WRONG_DAY = 'Day number exceeds the number of days in given month/year';
-    private static String REST_ERROR_DATE_IN_PAST = 'Requested date is in the past';
+    private static String ERROR_MISSING_DATE_PARAM_VALUES = 'Values for date parameters should not be empty';
+    private static String ERROR_WRONG_MONTH = 'Month parameter is not valid, should be between 1 and 12';
+    private static String ERROR_WRONG_DAY = 'Day number exceeds the number of days in given month/year';
+    private static String ERROR_DATE_IN_PAST = 'Requested date is in the past';
+    private static String ERROR_INCORRECT_EMAIL = 'provided email is incorrect';
+    private static String ERROR_APPOINTMENT_NOT_AVAILABLE = 'this time for appointment is not available';
+    private static String ERROR_TIME_PARAMETER = 'Time parameter is empty or invalid';
+    private static String ERROR_EMPTY_PARAM_DENTIST = 'dentistId parameter is empty or invalid';
+    private static String ERROR_EMPTY_CONTACT_PARAM = 'Contact parameter is not provided, check: contactFirst, contactLast, contactPhone';
     
     public class ConfigWrapper {
         public String timePeriod {get; set;}
@@ -17,15 +22,7 @@ public class DEN_IntegrationUtils {
         }
     }
     
-    public class ValidateResult {
-        public Boolean status {get; set;}
-        public String error {get; set;}
-        
-        public ValidateResult(Boolean status, String error) {
-            this.status = status;
-            this.error = error;
-        }
-    }
+    public class DenException extends Exception {}
     
     private static List<DEN_Config__c> getConfigFor(Id dentistId) {
         return [SELECT Id, Name, Weekday__c, Date__c, StartingHour__c, EndingHour__c FROM DEN_Config__c WHERE Dentist__c =: dentistId];
@@ -86,44 +83,113 @@ public class DEN_IntegrationUtils {
     }
     
     public static Boolean verifyAppointmentTime(Id dentistId, DateTime appointmentTime) {
-        Boolean result = true;
         List<String> avList = getAvailableTime(getAvailableConfig(appointmentTime.date(), dentistId));
-        if (avList.isEmpty()) {
-            return true;
-        } else {
-            for (String appointmentPeriod : avList) {
-                Integer startTime = appointmentTime.hour() * 60;
-                Integer endTime = startTime + 60;
-                if (appointmentPeriod.equals(DEN_HoursConverterController.getPeriodString(startTime, endTime))) {
-                    return false;
-                }
-            }    
+        for (String appointmentPeriod : avList) {
+            Integer startTime = appointmentTime.hour() * 60;
+            Integer endTime = startTime + 60;
+            if (appointmentPeriod.equals(DEN_HoursConverterController.getPeriodString(startTime, endTime))) {
+                return true;
+            }
         }
-        return result;
+        throw new DenException(ERROR_APPOINTMENT_NOT_AVAILABLE);
     }
     
-    public static Boolean ValidateResult(String email) {
-        Boolean result = false;
+    private Static Boolean validateAppointmentInputData(Id dentistId, String contactFirst, String contactLast, String contactEmail, String contactPhone, Integer year, Integer month, Integer day, Integer appointmentTime) {
+        if (validateDentistId(dentistId) && verifyAppointmentTime(dentistId, DEN_DateUtil.getDateTime(year, month, day, appointmentTime)) && validateContactString(contactFirst) && validateContactString(contactLast) && validateEmail(contactEmail) && validateDateInput(year, month, day) && validateAppointmentTime(appointmentTime)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    public static Boolean validateEmail(String email) {
         String emailRegex = '^[a-zA-Z0-9._|\\\\%#~`=?&/$^*!}{+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}$';
         Matcher myMatcher = Pattern.compile(emailRegex).matcher(email);
         if (myMatcher.matches()) {
-            result = true;
+            return true;
+        } else {
+            throw new DenException(ERROR_INCORRECT_EMAIL);
+        }
+    }
+    
+    private static Boolean validateAppointmentTime(Integer timeValue) {
+        if (timeValue >= 0 && timeValue <= 23) {
+            return true;
+        } else {
+            throw new DenException(ERROR_TIME_PARAMETER);
+        }
+    }
+    
+    private static Boolean validateDentistId(Id dentist) {
+        if (dentist == null) {
+            throw new DenException(ERROR_EMPTY_PARAM_DENTIST);
+        } else {
+            return true;
+        }
+    }
+    
+    private static Boolean validateContactString(String inputString) {
+        if (String.isEmpty(inputString)) {
+            throw new DenException(ERROR_EMPTY_CONTACT_PARAM);
+        } else {
+            return true;
+        }
+    }
+    
+    public static Boolean validateDateInput(Integer year, Integer month, Integer day) {
+        Date givenDate = Date.newInstance(year, month, day);
+        if (year == null || month == null || day == null) {
+            throw new DenException(ERROR_MISSING_DATE_PARAM_VALUES);
+        } else if (month > 12 || month <= 0) {
+            throw new DenException(ERROR_WRONG_MONTH);
+        } else if (day > Date.daysInMonth(year, month)) {
+            throw new DenException(ERROR_WRONG_DAY);
+        } else if (givenDate < Date.today()) {
+            throw new DenException(ERROR_DATE_IN_PAST);
+        } else {
+            return true;
+        }
+    }
+    
+    private static Id processContactData(String contactFirst, String contactLast, String contactEmail, String contactPhone) {
+        Id result;
+        String email = contactEmail;
+        List<Contact> contactsMatched = [SELECT Id, Name, FirstName, LastName, Phone, Email FROM Contact WHERE Email =: email];
+        if (contactsMatched.isEmpty()) {
+            Contact contact = new Contact();
+            contact.FirstName = contactFirst;
+            contact.LastName = contactLast;
+            contact.Email = contactEmail;
+            contact.Phone = contactPhone;
+            insert contact;
+            result = contact.Id;
+        } else {
+            contactsMatched[0].FirstName = contactFirst;
+            contactsMatched[0].LastName = contactLast;
+            contactsMatched[0].Phone = contactPhone;
+            update contactsMatched[0];
+            result = contactsMatched[0].Id;
         }
         return result;
     }
     
-    public static ValidateResult validateDateInput(Integer year, Integer month, Integer day) {
-        Date givenDate = Date.newInstance(year, month, day);
-        if (year == null || month == null || day == null) {
-            return new ValidateResult(false, REST_ERROR_MISSING_DATE_PARAM_VALUES);
-        } else if (month > 12 || month <= 0) {
-            return new ValidateResult(false, REST_ERROR_WRONG_MONTH);
-        } else if (day > Date.daysInMonth(year, month)) {
-            return new ValidateResult(false, REST_ERROR_WRONG_DAY);
-        } else if (givenDate < Date.today()) {
-            return new ValidateResult(false, REST_ERROR_DATE_IN_PAST);
-        } else {
-            return new ValidateResult(true, '');
+    public static DEN_Appointment__c createAppointment(Id dentistId, String contactFirst, String contactLast, String contactEmail, String contactPhone, Integer year, Integer month, Integer day, Integer appointmentTime) {
+        DEN_Appointment__c appointment = new DEN_Appointment__c();
+        if (validateAppointmentInputData(dentistId, contactFirst, contactLast, contactEmail, contactPhone, year, month, day, appointmentTime)) {
+            Date requestDate = Date.newInstance(year, month, day);
+            appointment.Patient__c = processContactData(contactFirst, contactLast, contactEmail, contactPhone);
+            appointment.Status__c = DEN_RegistrationController.getDefaultStatus();
+            appointment.Dentist__c = dentistId;
+            appointment.OwnerId = appointment.Dentist__c;
+            appointment.Telephone__c = contactPhone;
+            appointment.Date__c = requestDate;
+            appointment.DateTime__c = DateTime.newInstance(appointment.Date__c, Time.newInstance(appointmentTime, 0, 0, 0));
+            insert appointment;
         }
+        return appointment;
     }
+    
+    public static void setError(String msg) {
+        throw new DenException(msg);
+    }    
 }
