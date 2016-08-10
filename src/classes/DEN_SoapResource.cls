@@ -6,7 +6,7 @@ global class DEN_SoapResource {
                 result.add(new DentistsResponse(dentist));
             }
         } catch (Exception e) {
-            DEN_IntegrationUtils.setError(e.getMessage());
+            result.add(new DentistsResponse(e.getMessage()));
         }
         return result;
     }
@@ -19,7 +19,7 @@ global class DEN_SoapResource {
                 result.add(new DentistDayAvailabilityResponse(config));
             }
         } catch (Exception e) {
-            DEN_IntegrationUtils.setError(e.getMessage());
+            result.add(new DentistDayAvailabilityResponse(e.getMessage()));
         }
         return result;
     }
@@ -34,7 +34,7 @@ global class DEN_SoapResource {
                 }
             }
         } catch (Exception e) {
-            DEN_IntegrationUtils.setError(e.getMessage());
+            result.add(new DentistTimeAvailabilityResponse(e.getMessage(), false));
         }
         return result;
     }
@@ -44,18 +44,26 @@ global class DEN_SoapResource {
         try {
             result = new AppointmentResponse(DEN_IntegrationUtils.createAppointment(dentistId, contactFirst, contactLast, contactEmail, contactPhone, year, month, day, appointmentTime));
         } catch (Exception e) {
-            DEN_IntegrationUtils.setError(e.getMessage());
+            result = new AppointmentResponse(e.getMessage());
         }
         return result;
     }
 	
     global class DentistsResponse {
+        webservice Boolean success;
         webservice Id dentistId;
         webservice String dentistName;
+        webservice String message;
         
         public DentistsResponse(User dentist) {
+            this.success = true;
             this.dentistId = dentist.Id;
             this.dentistName = dentist.Name;
+        }
+        
+        public DentistsResponse(String msg) {
+            this.success = false;
+            this.message = msg;
         }
     }
     
@@ -63,31 +71,53 @@ global class DEN_SoapResource {
         webservice String timePeriod;
         webservice Date configDate;
         webservice String weekDay;
+        webservice String message;
+        webservice Boolean success;
         
         public DentistDayAvailabilityResponse(DEN_IntegrationUtils.ConfigWrapper item) {
             this.timePeriod = item.timePeriod;
             this.configDate = item.configDate;
             this.weekDay = item.weekDay;
+            this.success = true;
+        }
+        
+        public DentistDayAvailabilityResponse(String msg) {
+            this.success = false;
+            this.message = msg;
         }
     }
     
     global class DentistTimeAvailabilityResponse {
         webservice String response;
+        webservice Boolean success;
+        webservice String message;
         
         public DentistTimeAvailabilityResponse(String response) {
             this.response = response;
+            this.success = true;
+        }
+        
+        public DentistTimeAvailabilityResponse(String msg, Boolean temp) {
+            this.message = msg;
+            this.success = false;
         }
     }
     
     global class AppointmentResponse {
         webservice String response;
+        webservice Boolean success;
+        webservice String message;
         
         public AppointmentResponse(DEN_Appointment__c appointment) {
             this.response = appointment.Id;
+            this.success = true;
         }
         
-        AppointmentResponse() {
-            
+        public AppointmentResponse(String msg) {
+            this.success = false;
+            this.message = msg;
         }
+        
+        AppointmentResponse() {}
     }
 }

@@ -188,8 +188,4 @@ public class DEN_IntegrationUtils {
         }
         return appointment;
     }
-    
-    public static void setError(String msg) {
-        throw new DenException(msg);
-    }    
 }

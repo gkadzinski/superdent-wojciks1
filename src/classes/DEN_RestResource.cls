@@ -17,7 +17,7 @@ global with sharing class DEN_RestResource {
                     Id dentistId = params.get('dentistId');
                     setResponse(DEN_IntegrationUtils.setDentistDayAvailabilityResult(dentistId));
                 } else {
-                    DEN_IntegrationUtils.setError(REST_ERROR_MISSING_PARAMETERS);
+                    setError(REST_ERROR_MISSING_PARAMETERS);
                 }
             } else if ('getDentistTimeAvailability'.equals(action)) {
                 if (params.containsKey('dentistId') && params.containsKey('year') && params.containsKey('month') && params.containsKey('day')) {
@@ -30,13 +30,13 @@ global with sharing class DEN_RestResource {
                         setResponse(DEN_IntegrationUtils.getAvailableTime(DEN_IntegrationUtils.getAvailableConfig(requestDate, dentistId)));
                     }
                 } else {
-                    DEN_IntegrationUtils.setError(REST_ERROR_MISSING_PARAMETERS);
+                    setError(REST_ERROR_MISSING_PARAMETERS);
                 }
             } else {
-                DEN_IntegrationUtils.setError(REST_ERROR_INCORRECT_URI);
+                setError(REST_ERROR_INCORRECT_URI);
             }
         } catch (Exception e) {
-            DEN_IntegrationUtils.setError(e.getMessage());
+            setError(e.getMessage());
         }
     }
     
@@ -45,7 +45,7 @@ global with sharing class DEN_RestResource {
         try {
             setResponse(DEN_IntegrationUtils.createAppointment(dentistId, contactFirst, contactLast, contactEmail, contactPhone, year, month, day, appointmentTime));
         } catch (Exception e) {
-            DEN_IntegrationUtils.setError(e.getMessage());
+            setError(e.getMessage());
         }
     }
     /*
@@ -62,8 +62,29 @@ global with sharing class DEN_RestResource {
 }
 	*/
     
+    private static void setError(String msg) {
+        RestContext.response.addHeader('Content-Type', 'application/json');
+        RestContext.response.responseBody = Blob.valueOf(JSON.serializePretty(new BaseResponse(false, msg)));
+    }
+    
     private static void setResponse(Object obj) {
         RestContext.response.addHeader('Content-Type', 'application/json');
-        RestContext.response.responseBody = Blob.valueOf(JSON.serializePretty(obj));
+        RestContext.response.responseBody = Blob.valueOf(JSON.serializePretty(new BaseResponse(true, obj)));
+    }
+    
+    global class BaseResponse {
+        public Boolean success;
+        public String message;
+        public Object response;
+        
+        public BaseResponse(Boolean success, String message) {
+            this.success = success;
+            this.message = message;
+        }
+        
+        public BaseResponse(Boolean success, Object response) {
+            this.success = success;
+            this.response = response;
+        }
     }
 }
