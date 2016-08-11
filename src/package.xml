@@ -61,6 +61,7 @@
         <name>Flow</name>
     </types>
     <types>
+        <members>DEN_AppointmentLock__c-DEN_AppointmentLock Layout</members>
         <members>DEN_Appointment__c-DEN_Appointment Layout</members>
         <members>DEN_Appointment__c-DEN_Consultation</members>
         <members>DEN_Appointment__c-DEN_Treatment</members>
@@ -82,6 +83,7 @@
         <name>StaticResource</name>
     </types>
     <types>
+        <members>DEN_AppointmentLock__c</members>
         <members>DEN_Appointment__c</members>
         <members>DEN_Config__c</members>
         <name>Workflow</name>

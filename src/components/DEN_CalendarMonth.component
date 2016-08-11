@@ -1,4 +1,4 @@
-<apex:component controller="DEN_CalendarMonthController">
+<apex:component controller="DEN_CalendarMonthController" allowDML="true">
     <style type="text/css">
         .availabletrue {
         	background-color: green;
@@ -51,8 +51,7 @@
 	                    selectedDay(day);
 	                    timePicker = j$('[id*=timePicker]');
 	                    timePicker.show();
-	                }
-	                else {
+	                } else {
 	                    alert('Please select available day (marked - Green)');
 	                    return false;
 	                }
@@ -60,22 +59,29 @@
 	        });
 	    }
 	    
-	    function openForm(time) {
+	    function verifyTimeAvailability(time) {
             j$('[id*=timeSlot]').removeClass('selectedDay');
 	        j$('[id*=timeSlot]').each(function() {
 	            if (j$(this).text() == time) {
 	                if (j$(this).hasClass('availabletrue')) {
                         j$(this).addClass('selectedDay');
                         selectedTime(time);
-                        openPopup();
-	                }
-	                else {
+	                } else {
 	                    alert('Please select available Time (marked - Green)');
 	                    return false;
 	                }
 	            }
 	        });
 	    }
+    
+    	function openForm(locked) {
+            if (locked == 'true') {
+                alert('currently locked, please check again in 5 minutes, or select different slot');
+                return false;
+            } else {
+                openPopup();
+            }
+        }
     </script>
     <apex:attribute name="dentist" description="to pass dentist ID to component" type="String" assignTo="{!dentistId}"/>
     <apex:attribute name="appoint" description="appointment object to communicate" type="DEN_Appointment__c" assignTo="{!appointment}"/>
@@ -102,11 +108,12 @@
             <apex:outputPanel id="timePicker">
                 <apex:outputLabel >Selected dentist: {!dentistName}<br/>Available time slots for date: {!selectedDay} {!actualMonthName}</apex:outputLabel>        
                 <apex:pageBlockTable value="{!AllTimeSlots}" var="time" style="width: 20%;">
-                    <apex:column headerValue="TimeSlots" value="{!time.timePeriod}" onclick="openForm('{!time.timePeriod}');" id="timeSlot" styleClass="available{!time.available}" style="cursor: pointer;"/>
+                    <apex:column headerValue="TimeSlots" value="{!time.timePeriod}" onclick="verifyTimeAvailability('{!time.timePeriod}');" id="timeSlot" styleClass="available{!time.available}" style="cursor: pointer;"/>
                 </apex:pageBlockTable>
-                <apex:actionFunction name="selectedTime" reRender="false">
+                <apex:actionFunction name="selectedTime" reRender="false" oncomplete="verifyLock();">
                     <apex:param assignTo="{!selectedTime}" name="selectedTime" value=""/>
                 </apex:actionFunction>
+                <apex:actionFunction name="verifyLock" action="{!verifyLock}" reRender="false" oncomplete="openForm('{!appointmentLocked}');"/>
             </apex:outputPanel>
         </apex:pageBlockSection>
     </apex:pageBlock>

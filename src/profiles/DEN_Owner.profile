@@ -47,6 +47,21 @@
     <custom>true</custom>
     <fieldPermissions>
         <editable>true</editable>
+        <field>DEN_AppointmentLock__c.AppointmentTime__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>DEN_AppointmentLock__c.DeleteTime__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>DEN_AppointmentLock__c.Dentist__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>DEN_Appointment__c.Date__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -100,6 +115,9 @@
         <field>DEN_Config__c.Weekday__c</field>
         <readable>true</readable>
     </fieldPermissions>
+    <layoutAssignments>
+        <layout>DEN_AppointmentLock__c-DEN_AppointmentLock Layout</layout>
+    </layoutAssignments>
     <layoutAssignments>
         <layout>DEN_Appointment__c-DEN_Appointment Layout</layout>
     </layoutAssignments>

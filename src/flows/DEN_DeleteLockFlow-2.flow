@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <interviewLabel>DEN_DeleteLockFlow {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>DEN_DeleteLockFlow2</label>
+    <processType>AutoLaunchedFlow</processType>
+    <recordDeletes>
+        <name>DeleteLock</name>
+        <label>DeleteLock</label>
+        <locationX>295</locationX>
+        <locationY>227</locationY>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>AppointmentLockId</elementReference>
+            </value>
+        </filters>
+        <object>DEN_AppointmentLock__c</object>
+    </recordDeletes>
+    <startElementReference>DeleteLock</startElementReference>
+    <variables>
+        <name>AppointmentLockId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>true</isOutput>
+    </variables>
+</Flow>

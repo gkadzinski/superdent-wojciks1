@@ -5,6 +5,7 @@ public with sharing class DEN_CalendarMonthController {
     public Id dentistId {get; set;}
     public DEN_Appointment__c appointment {get; set;}
     public Date displayedMonth {get; set;}
+    public Boolean appointmentLocked {get; set;}
     public Integer selectedDay {get; set;}
     public String selectedTime {get;
                                 set {
@@ -24,6 +25,23 @@ public with sharing class DEN_CalendarMonthController {
     
     public String getActualMonthName() {
         return DEN_DateUtil.getActualMonthName(displayedMonth);
+    }
+
+    public void createLock() {
+        insert new DEN_AppointmentLock__c(AppointmentTime__c = appointment.DateTime__c, Dentist__c = dentistId);
+    }
+    
+    public PageReference verifyLock() {
+        appointmentLocked = false;
+        for (DEN_AppointmentLock__c lockItem : [SELECT Id, Dentist__c, AppointmentTime__c FROM DEN_AppointmentLock__c]) {
+            if (lockItem.Dentist__c == dentistId && lockItem.AppointmentTime__c == appointment.DateTime__c) {
+                appointmentLocked = true;
+            }
+        }
+        if (!appointmentLocked) {
+            createLock();
+        }
+        return null;
     }
     
     public List<TimeWrapper> getAllTimeSlots() {

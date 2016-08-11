@@ -46,6 +46,21 @@
     </classAccesses>
     <custom>true</custom>
     <fieldPermissions>
+        <editable>false</editable>
+        <field>DEN_AppointmentLock__c.AppointmentTime__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>DEN_AppointmentLock__c.DeleteTime__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>DEN_AppointmentLock__c.Dentist__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>DEN_Appointment__c.Date__c</field>
         <readable>true</readable>
@@ -101,6 +116,9 @@
         <readable>true</readable>
     </fieldPermissions>
     <layoutAssignments>
+        <layout>DEN_AppointmentLock__c-DEN_AppointmentLock Layout</layout>
+    </layoutAssignments>
+    <layoutAssignments>
         <layout>DEN_Appointment__c-DEN_Appointment Layout</layout>
     </layoutAssignments>
     <layoutAssignments>
@@ -114,6 +132,15 @@
     <layoutAssignments>
         <layout>DEN_Config__c-DEN_Config Layout</layout>
     </layoutAssignments>
+    <objectPermissions>
+        <allowCreate>true</allowCreate>
+        <allowDelete>true</allowDelete>
+        <allowEdit>true</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>DEN_AppointmentLock__c</object>
+        <viewAllRecords>false</viewAllRecords>
+    </objectPermissions>
     <objectPermissions>
         <allowCreate>true</allowCreate>
         <allowDelete>false</allowDelete>
