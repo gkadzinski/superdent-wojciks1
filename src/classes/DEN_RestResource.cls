@@ -41,9 +41,9 @@ global with sharing class DEN_RestResource {
     }
     
     @HttpPost
-    global static void createAppointment(Id dentistId, String contactFirst, String contactLast, String contactEmail, String contactPhone, Integer year, Integer month, Integer day, Integer appointmentTime) {
+    global static void createAppointment(Id dentistId, String contactFirst, String contactLast, String contactEmail, String contactPhone, Integer year, Integer month, Integer day, Integer appointmentHour, Integer appointmentTime) {
         try {
-            setResponse(DEN_IntegrationUtils.createAppointment(dentistId, contactFirst, contactLast, contactEmail, contactPhone, year, month, day, appointmentTime));
+            setResponse(DEN_IntegrationUtils.createAppointment(dentistId, contactFirst, contactLast, contactEmail, contactPhone, year, month, day, appointmentHour, appointmentTime));
         } catch (Exception e) {
             setError(e.getMessage());
         }

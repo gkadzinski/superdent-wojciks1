@@ -38,9 +38,9 @@ public class DEN_IntegrationUtils {
     
     public static List<String> getAvailableTime(List<Integer> avSlots) {
         List<String> result = new List<String>();
-        for (Integer i=0; i<24; i++) {
-            Integer startTime = i*60;
-            Integer endTime = (i + 1)*60;
+        for (Integer i=0; i<48; i++) {
+            Integer startTime = i*30;
+            Integer endTime = startTime + 30;
             if (!avSlots.isEmpty()) {
                 for (Integer idx=0; idx<avSlots.size(); idx+=2) {
                     If (startTime >= avSlots[idx] && endTime <= avSlots[idx + 1]) {
@@ -76,7 +76,7 @@ public class DEN_IntegrationUtils {
         List<DEN_Appointment__c> slotsWithVisits = [SELECT DateTime__c FROM DEN_Appointment__c WHERE Date__c =: requestDate and Dentist__c =: dentistId and Status__c !=: APOINTMENT_STATUS_REJECTED];
         if (!slotsWithVisits.isEmpty()) {
             for (DEN_Appointment__c appointment : slotsWithVisits) {
-                resultsToRemove.add(appointment.DateTime__c.hour()*60);
+                resultsToRemove.add(appointment.DateTime__c.hour()*60 + appointment.DateTime__c.minute());
             }
         }
         return DEN_CalendarMonthController.getMultipleElementLimitedResults(result, resultsToRemove);
@@ -85,8 +85,8 @@ public class DEN_IntegrationUtils {
     public static Boolean verifyAppointmentTime(Id dentistId, DateTime appointmentTime) {
         List<String> avList = getAvailableTime(getAvailableConfig(appointmentTime.date(), dentistId));
         for (String appointmentPeriod : avList) {
-            Integer startTime = appointmentTime.hour() * 60;
-            Integer endTime = startTime + 60;
+            Integer startTime = appointmentTime.hour() * 60 + appointmentTime.minute();
+            Integer endTime = startTime + 30;
             if (appointmentPeriod.equals(DEN_HoursConverterController.getPeriodString(startTime, endTime))) {
                 return true;
             }
@@ -94,8 +94,8 @@ public class DEN_IntegrationUtils {
         throw new DenException(ERROR_APPOINTMENT_NOT_AVAILABLE);
     }
     
-    private Static Boolean validateAppointmentInputData(Id dentistId, String contactFirst, String contactLast, String contactEmail, String contactPhone, Integer year, Integer month, Integer day, Integer appointmentTime) {
-        if (validateDentistId(dentistId) && verifyAppointmentTime(dentistId, DEN_DateUtil.getDateTime(year, month, day, appointmentTime)) && validateContactString(contactFirst) && validateContactString(contactLast) && validateEmail(contactEmail) && validateDateInput(year, month, day) && validateAppointmentTime(appointmentTime)) {
+    private Static Boolean validateAppointmentInputData(Id dentistId, String contactFirst, String contactLast, String contactEmail, String contactPhone, Integer year, Integer month, Integer day, Integer appointmentHour, Integer appointmentTime) {
+        if (validateDentistId(dentistId) && verifyAppointmentTime(dentistId, DEN_DateUtil.getDateTime(year, month, day, appointmentHour, appointmentTime)) && validateContactString(contactFirst) && validateContactString(contactLast) && validateEmail(contactEmail) && validateDateInput(year, month, day) && validateAppointmentHour(appointmentHour)) {
             return true;
         } else {
             return false;
@@ -112,8 +112,16 @@ public class DEN_IntegrationUtils {
         }
     }
     
-    private static Boolean validateAppointmentTime(Integer timeValue) {
-        if (timeValue >= 0 && timeValue <= 23) {
+    private static Boolean validateAppointmentHour(Integer hour) {
+        if (hour >= 0 && hour <= 23) {
+            return true;
+        } else {
+            throw new DenException(ERROR_TIME_PARAMETER);
+        }
+    }
+    
+    private static Boolean validateAppointmentTime(Integer minute) {
+        if (minute == 30 || minute == 0) {
             return true;
         } else {
             throw new DenException(ERROR_TIME_PARAMETER);
@@ -173,9 +181,9 @@ public class DEN_IntegrationUtils {
         return result;
     }
     
-    public static DEN_Appointment__c createAppointment(Id dentistId, String contactFirst, String contactLast, String contactEmail, String contactPhone, Integer year, Integer month, Integer day, Integer appointmentTime) {
+    public static DEN_Appointment__c createAppointment(Id dentistId, String contactFirst, String contactLast, String contactEmail, String contactPhone, Integer year, Integer month, Integer day, Integer appointmentHour, Integer appointmentTime) {
         DEN_Appointment__c appointment = new DEN_Appointment__c();
-        if (validateAppointmentInputData(dentistId, contactFirst, contactLast, contactEmail, contactPhone, year, month, day, appointmentTime)) {
+        if (validateAppointmentInputData(dentistId, contactFirst, contactLast, contactEmail, contactPhone, year, month, day, appointmentHour, appointmentTime)) {
             Date requestDate = Date.newInstance(year, month, day);
             appointment.Patient__c = processContactData(contactFirst, contactLast, contactEmail, contactPhone);
             appointment.Status__c = DEN_RegistrationController.getDefaultStatus();
@@ -183,7 +191,7 @@ public class DEN_IntegrationUtils {
             appointment.OwnerId = appointment.Dentist__c;
             appointment.Telephone__c = contactPhone;
             appointment.Date__c = requestDate;
-            appointment.DateTime__c = DateTime.newInstance(appointment.Date__c, Time.newInstance(appointmentTime, 0, 0, 0));
+            appointment.DateTime__c = DateTime.newInstance(appointment.Date__c, Time.newInstance(appointmentHour, appointmentTime, 0, 0));
             insert appointment;
         }
         return appointment;

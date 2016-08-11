@@ -11,7 +11,6 @@ public with sharing class DEN_CalendarMonthController {
                                 set {
                                 	selectedTime = value;
                                     appointment.DateTime__c = DateTime.newInstance(DEN_DateUtil.getDateFrom(displayedMonth, selectedDay), DEN_HoursConverterController.getStartTime(selectedTime));
-                                    appointment.Date__c = appointment.DateTime__c.date();
                                 }
                                }
     
@@ -48,10 +47,10 @@ public with sharing class DEN_CalendarMonthController {
         List<TimeWrapper> result = new List<TimeWrapper>();
         List<Integer> availableTimePeriod = getAvailableSlots();
         Boolean available;
-        for (Integer i=0; i<24; i++) {
+        for (Integer i=0; i<48; i++) {
             available = false;
-            Integer startTime = i*60;
-            Integer endTime = (i + 1)*60;
+            Integer startTime = i*30;
+            Integer endTime = startTime + 30;
             if (!availableTimePeriod.isEmpty()) {
                 for (Integer idx=0; idx<availableTimePeriod.size(); idx+=2) {
                     If (startTime >= availableTimePeriod[idx] && endTime <= availableTimePeriod[idx + 1]) {
@@ -121,7 +120,7 @@ public with sharing class DEN_CalendarMonthController {
             List<DEN_Appointment__c> slotsWithVisits = [SELECT DateTime__c FROM DEN_Appointment__c WHERE Date__c =: selDate and Dentist__c =: dentistId and Status__c != 'Odrzucona'];
             if (!slotsWithVisits.isEmpty()) {
                 for (DEN_Appointment__c appointment : slotsWithVisits) {
-                    resultsToRemove.add(appointment.DateTime__c.hour()*60);
+                    resultsToRemove.add(appointment.DateTime__c.hour()*60 + appointment.DateTime__c.minute());
                 }
             }
         }
@@ -131,7 +130,7 @@ public with sharing class DEN_CalendarMonthController {
     public static List<Integer> getSingleElementLimitedResults(List<Integer> result, Integer resultToRemove) {
         List<Integer> resultList = new List<Integer>();
         Integer startRemove = resultToRemove;
-        Integer endRemove = startRemove + 60;
+        Integer endRemove = startRemove + 30;
         for (Integer i=0; i<result.size(); i+=2) {
             Integer startInt = result[i];
             Integer endInt = result[i + 1];

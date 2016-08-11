@@ -80,6 +80,7 @@ public with sharing class DEN_RegistrationController {
         appointment.Status__c = getDefaultStatus();
         appointment.Dentist__c = dentistId;
         appointment.OwnerId = appointment.Dentist__c;
+        appointment.Date__c = appointment.DateTime__c.date();
         insert appointment;
         return null;
     }

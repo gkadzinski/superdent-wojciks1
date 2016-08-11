@@ -39,10 +39,10 @@ global class DEN_SoapResource {
         return result;
     }
     
-    webservice static AppointmentResponse createAppointment(Id dentistId, String contactFirst, String contactLast, String contactEmail, String contactPhone, Integer year, Integer month, Integer day, Integer appointmentTime) {
+    webservice static AppointmentResponse createAppointment(Id dentistId, String contactFirst, String contactLast, String contactEmail, String contactPhone, Integer year, Integer month, Integer day, Integer appointmentHour, Integer appointmentTime) {
         AppointmentResponse result = new AppointmentResponse();
         try {
-            result = new AppointmentResponse(DEN_IntegrationUtils.createAppointment(dentistId, contactFirst, contactLast, contactEmail, contactPhone, year, month, day, appointmentTime));
+            result = new AppointmentResponse(DEN_IntegrationUtils.createAppointment(dentistId, contactFirst, contactLast, contactEmail, contactPhone, year, month, day, appointmentHour, appointmentTime));
         } catch (Exception e) {
             result = new AppointmentResponse(e.getMessage());
         }

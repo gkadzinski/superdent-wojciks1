@@ -53,7 +53,8 @@
 	                    timePicker.show();
 	                } else {
 	                    alert('Please select available day (marked - Green)');
-	                    return false;
+                        hideLoading();
+                        return false;
 	                }
 	            }
 	        });
