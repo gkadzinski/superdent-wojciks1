@@ -2,7 +2,7 @@
     <apex:includeScript value="https://code.jquery.com/jquery-1.12.3.min.js"/>
     <apex:form >
         <script type="text/javascript">
-        j$ = jQuery.noConflict();                
+        j$ = jQuery.noConflict();
         var startingHourSection;
         var endingHourSection;
         var startingHourField;
@@ -32,7 +32,7 @@
             startingHourField.change(function() {
                 unhideAllOptions(endingHourField);
                 endingHourSection.show();
-                endingHourField.val(+startingHourField.val() + 60);
+                endingHourField.val(+startingHourField.val() + 30);
                 hideOptionsBetween(endingHourField, 0, +startingHourField.val());
             });
 

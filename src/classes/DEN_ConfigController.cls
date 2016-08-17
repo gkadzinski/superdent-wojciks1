@@ -34,8 +34,8 @@ public class DEN_ConfigController {
 
     private List<SelectOption> populateHourPicklist(Schema.SObjectField field) {
         List<SelectOption> result = new List<SelectOption>();
-        for (Integer i=0; i<=24; i++) {
-            Integer minutes = i*60;
+        for (Integer i=0; i<=48; i++) {
+            Integer minutes = i*30;
             String label = DEN_HoursConverterController.getStringValue(minutes);
             String value = String.valueOf(minutes);
             result.add(new SelectOption(value, label));

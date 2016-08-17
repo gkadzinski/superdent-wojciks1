@@ -10,11 +10,21 @@ public class DEN_AppointmentExtension {
     public String filteredDentist {get; set;}
     public String filteredClient {get; set;}
     public String filteredType {get; set;}
+    public DEN_Config__c config {get; set;}
+    public List<SelectOption> startHours {get; set;}
+    public List<SelectOption> endHours {get; set;}
     
     
     public DEN_AppointmentExtension(ApexPages.StandardController stdController) {
 		userId = UserInfo.getUserId();
-        isOwnerLogged = UserInfo.getProfileId().equals([SELECT Id FROM Profile WHERE Name =: 'DEN_Owner']);
+        isOwnerLogged = true;
+        //isOwnerLogged = UserInfo.getProfileId().equals([SELECT Id FROM Profile WHERE Name =: 'DEN_Owner']);
+        if (isOwnerLogged) {
+            List<DEN_Config__c> ownerConfig = [SELECT Id, StartingHour__c, EndingHour__c FROM DEN_Config__c WHERE Weekday__c = null AND Date__c = null AND Dentist__c = null];
+            config = ownerConfig.isEmpty() ? new DEN_Config__c() : ownerConfig[0];
+            startHours = populateHourPicklist(DEN_Config__c.StartingHour__c);
+            endHours = populateHourPicklist(DEN_Config__c.EndingHour__c);
+        }
     }
 	
     public ApexPages.StandardSetController appointmentSetCon {
@@ -68,6 +78,29 @@ public class DEN_AppointmentExtension {
     public PageReference applyFilter() {
         appointmentSetCon = new ApexPages.StandardSetController(Database.query(getQueryString()));
         return null;
+    }
+    
+    public PageReference saveConfig() {
+        upsert config;
+        ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO, 'Config saved'));
+        return null;
+    }
+    
+    private List<SelectOption> populateHourPicklist(Schema.SObjectField field) {
+        List<SelectOption> result = new List<SelectOption>();
+        for (Integer i=0; i<=48; i++) {
+            Integer minutes = i*30;
+            String label = DEN_HoursConverterController.getStringValue(minutes);
+            String value = String.valueOf(minutes);
+            result.add(new SelectOption(value, label));
+        }
+        if (DEN_Config__c.StartingHour__c == field) {
+            result.remove(result.size()-1);
+        }
+        if (DEN_Config__c.EndingHour__c == field) {
+            result.remove(0);
+        }
+        return result;
     }
     
     private List<SelectOption> listInit() {

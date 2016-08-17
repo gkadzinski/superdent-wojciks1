@@ -55,6 +55,10 @@ public class DEN_IntegrationUtils {
     public static List<Integer> getAvailableConfig(Date requestDate, ID dentistId) {
         List<Integer> result = new List<Integer>();
         List<Integer> resultsToRemove = new List<Integer>();
+        List<DEN_Config__c> clinicConfigSetup = [SELECT Id, StartingHour__c, EndingHour__c FROM DEN_Config__c WHERE Weekday__c = null AND Date__c = null AND Dentist__c = null];
+        DEN_Config__c clinicConfig = clinicConfigSetup.isEmpty() ? new DEN_Config__c(StartingHour__c = 0, EndingHour__c = 1440) : clinicConfigSetup[0];
+        Integer clinicStart = Integer.valueOf(clinicConfig.StartingHour__c);
+        Integer clinicEnd = Integer.valueOf(clinicConfig.EndingHour__c);
         String selDateWeekDay = DEN_DateUtil.getWeekdayFrom(requestDate);
         Boolean dateConfig = false;
         for (DEN_Config__c config : [SELECT Id, Name, Weekday__c, Date__c, StartingHour__c, EndingHour__c FROM DEN_Config__c WHERE Dentist__c =: dentistId]) {
@@ -79,7 +83,7 @@ public class DEN_IntegrationUtils {
                 resultsToRemove.add(appointment.DateTime__c.hour()*60 + appointment.DateTime__c.minute());
             }
         }
-        return DEN_CalendarMonthController.getMultipleElementLimitedResults(result, resultsToRemove);
+        return DEN_CalendarMonthController.applyClinicConfig(DEN_CalendarMonthController.getMultipleElementLimitedResults(result, resultsToRemove), clinicStart, clinicEnd);
     }
     
     public static Boolean verifyAppointmentTime(Id dentistId, DateTime appointmentTime) {

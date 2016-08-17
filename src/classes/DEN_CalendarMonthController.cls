@@ -2,6 +2,7 @@ public with sharing class DEN_CalendarMonthController {
     public static final List<String> WEEKDAYS = new List<String> {'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'};
 	
     private List<DEN_Config__c> userConfig {get; set;}
+    private DEN_Config__c clinicConfig {get; set;}
     public Id dentistId {get; set;}
     public DEN_Appointment__c appointment {get; set;}
     public Date displayedMonth {get; set;}
@@ -16,6 +17,8 @@ public with sharing class DEN_CalendarMonthController {
     
     public DEN_CalendarMonthController() {
         displayedMonth = Date.today().toStartOfMonth();
+        List<DEN_Config__c> clinicConfigSetup = [SELECT Id, StartingHour__c, EndingHour__c FROM DEN_Config__c WHERE Weekday__c = null AND Date__c = null AND Dentist__c = null];
+        clinicConfig = clinicConfigSetup.isEmpty() ? new DEN_Config__c(StartingHour__c = 0, EndingHour__c = 1440) : clinicConfigSetup[0];
 	}
     
     public String getDentistName() {
@@ -72,7 +75,7 @@ public with sharing class DEN_CalendarMonthController {
 			String dayOfWeek = DEN_DateUtil.getWeekdayFrom(displayedMonth, day + 1);
             if (displayedMonth.addDays(day) >= Date.today()) {
                 for (DEN_Config__c config : userConfig) {
-                    if ((config.Weekday__c != null && config.Weekday__c.equals(dayOfWeek.toUpperCase())) || (config.Date__c != null && config.Date__c == displayedMonth.addDays(day))) {
+                    if ((config.Weekday__c != null && config.Weekday__c.equalsIgnoreCase(dayOfWeek)) || (config.Date__c != null && config.Date__c == displayedMonth.addDays(day))) {
                         available = true;
                         break;
                     }
@@ -93,6 +96,30 @@ public with sharing class DEN_CalendarMonthController {
         }
 		return retList;
 	}
+    
+    public static List<Integer> applyClinicConfig(List<Integer> userConfig, Integer startClinic, Integer endClinic) {
+        List<Integer> result = new List<Integer>();
+        if (!userConfig.isEmpty()) {
+            for (Integer idx=0; idx<userConfig.size(); idx+=2) {
+                Integer startConfig = userConfig[idx];
+                Integer endConfig = userConfig[idx+1];
+                if (startConfig >= startClinic && endConfig <= endClinic) {
+                    result.add(startConfig);
+                    result.add(endConfig);
+                } else if (startConfig <= startClinic && endConfig <= endClinic && endConfig > startClinic) {
+                    result.add(startClinic);
+                    result.add(endConfig);
+                } else if (startConfig >= startClinic && endConfig >= endClinic && startConfig < endClinic) {
+                    result.add(startConfig);
+                    result.add(endClinic);
+                } else if (startConfig <= startClinic && endConfig >= endClinic) {
+                    result.add(startClinic);
+                    result.add(endClinic);
+                }
+            }
+        }
+        return result;
+    }
 	
 	private List<Integer> getAvailableSlots() {
         List<Integer> result = new List<Integer>();
@@ -111,7 +138,7 @@ public with sharing class DEN_CalendarMonthController {
             if (!dateConfig) {
                 result.clear();
                 for (DEN_Config__c config : userConfig) {
-                    if (config.Weekday__c != null && config.Weekday__c.equals(selDateWeekDay.toUpperCase())) {
+                    if (config.Weekday__c != null && config.Weekday__c.equalsIgnoreCase(selDateWeekDay)) {
 						result.add(Integer.valueOf(config.StartingHour__c));
                         result.add(Integer.valueOf(config.EndingHour__c));
                     }
@@ -124,7 +151,7 @@ public with sharing class DEN_CalendarMonthController {
                 }
             }
         }
-        return getMultipleElementLimitedResults(result, resultsToRemove);
+        return applyClinicConfig(getMultipleElementLimitedResults(result, resultsToRemove), Integer.valueOf(clinicConfig.StartingHour__c), Integer.valueOf(clinicConfig.EndingHour__c));
     }
 
     public static List<Integer> getSingleElementLimitedResults(List<Integer> result, Integer resultToRemove) {
