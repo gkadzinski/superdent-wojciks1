@@ -1,20 +1,21 @@
 <apex:component controller="DEN_CalendarMonthController" allowDML="true">
     <style type="text/css">
         .availabletrue {
-        	background-color: green;
+        	background-color: #5cb85c;
         }
         
         .availablefalse {
-        	background-color: red;
+        	background-color: #d9534f;
         }
         
         .day {
         	cursor: pointer;
-        	width: 75px;
-        	height: 75px;
+        	width: 50px;
+        	height: 50px;
         	border: solid 1px black;
         	float: left;
         	margin: 5px 5px;
+        	text-align: center;
         }
         
         .day:nth-child(7n+8) {
@@ -27,7 +28,7 @@
         }
         
         .selectedDay {
-        	background-color: yellow;
+        	background-color: #f0ad4e;
         }
     </style>
     <script type="text/javascript">
@@ -89,14 +90,15 @@
     <apex:pageBlock >
         <apex:pageBlockSection columns="2">
             <apex:outputPanel id="datePicker">
+                <apex:outputLabel >Selected dentist: {!dentistName}</apex:outputLabel>
                 <apex:panelGrid columns="3">
-                    <apex:commandLink action="{!previousMonth}" reRender="datePicker" onclick="showLoading();" oncomplete="hideTimePicker(); hideLoading();">Previous Month</apex:commandLink>
-                    <apex:outputLabel style="font-size: 200%; font-weight: bold;">{!actualMonthName}</apex:outputLabel>
-                    <apex:commandLink action="{!nextMonth}" reRender="datePicker" onclick="showLoading();" oncomplete="hideTimePicker(); hideLoading();">Next Month</apex:commandLink>
+                    <apex:commandLink action="{!previousMonth}" reRender="datePicker" onclick="showLoading();" oncomplete="hideTimePicker(); hideLoading();" styleClass="btn btn-default"><span class="glyphicon glyphicon-arrow-left"></span> Previous Month</apex:commandLink>
+                    <apex:outputLabel style="font-size: 120%;" styleClass="label label-info">{!actualMonthName}</apex:outputLabel>
+                    <apex:commandLink action="{!nextMonth}" reRender="datePicker" onclick="showLoading();" oncomplete="hideTimePicker(); hideLoading();" styleClass="btn btn-default">Next Month <span class="glyphicon glyphicon-arrow-right"></span></apex:commandLink>
                 </apex:panelGrid>
                 <apex:outputPanel >
                     <apex:repeat value="{!calendarDays}" var="cal">
-                        <div class="available{!cal.available} day" onclick="showLoading(); dateSelected('{!cal.day}');">
+                        <div class="available{!cal.available} day img-circle" onclick="showLoading(); dateSelected('{!cal.day}');">
                             <apex:outputText value="{!cal.dayOfWeek}" style="font-size: 10px;"/><br/>
                             <apex:outputText value="{!cal.day}" style="font-size: 25px;" id="dayNumber"/>
                         </div>
@@ -106,8 +108,7 @@
                     </apex:actionFunction>
                 </apex:outputPanel>
             </apex:outputPanel>
-            <apex:outputPanel id="timePicker">
-                <apex:outputLabel >Selected dentist: {!dentistName}<br/>Available time slots for date: {!selectedDay} {!actualMonthName}</apex:outputLabel>        
+            <apex:outputPanel id="timePicker" style="height: 500px;">
                 <apex:pageBlockTable value="{!AllTimeSlots}" var="time" style="width: 20%;">
                     <apex:column headerValue="TimeSlots" value="{!time.timePeriod}" onclick="verifyTimeAvailability('{!time.timePeriod}');" id="timeSlot" styleClass="available{!time.available}" style="cursor: pointer;"/>
                 </apex:pageBlockTable>
