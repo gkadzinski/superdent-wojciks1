@@ -1,7 +1,7 @@
 <apex:page showHeader="false" standardStylesheets="true" controller="DEN_RegistrationController">
     <apex:stylesheet value="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
-    <apex:includeScript value="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"/>
     <apex:includeScript value="https://code.jquery.com/jquery-1.12.3.min.js"/>
+    <apex:includeScript value="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"/>
     <div class="container">
         <apex:form >
             <style type="text/css">
@@ -115,7 +115,7 @@
                 </nav>
                 <div class="panel panel-default panel-info">
                     <div class="panel-heading">Please select Dentist and available time for Appointment</div>
-                    <div class="panel-body">
+                    <div class="panel-body" style="height: auto;">
                         <apex:pageBlockSection collapsible="false" columns="1">
                             <div class="form-group">
                                 <apex:pageBlockSectionItem >
@@ -165,17 +165,17 @@
                         <apex:pageBlock >
                             <apex:pageMessage summary="Please fill appointment form (required fields marked red)" severity="info" strength="1"/>
                             <apex:pageBlockButtons location="bottom">
-                                <apex:commandButton value="Send" onclick="validateForm();" reRender="firstName, lastName, email"/>
-                                <apex:commandButton value="Cancel" onclick="closePopup(); this.form.reset(); return false;"/>
+                                <apex:commandButton value="Send" onclick="validateForm();" reRender="firstName, lastName, email" style="background: #5cb85c;" styleClass="btn"/>
+                                <apex:commandButton value="Cancel" onclick="closePopup(); this.form.reset(); return false;" style="background: #d9534f;" styleClass="btn"/>
                                 <apex:actionFunction name="processForm" action="{!save}" oncomplete="alert('Thank you for registration.'); location.reload();"/>
                             </apex:pageBlockButtons>
                             <apex:pageBlockSection columns="1" id="inputFields">
-                                <apex:inputField value="{!appointment.RecordTypeId}" label="Appointment Type" id="recordType"/>
-                                <apex:inputField value="{!contact.FirstName}" required="true" id="firstName"/>
-                                <apex:inputField value="{!contact.LastName}" required="true" id="lastName"/>
-                                <apex:inputField value="{!contact.Email}" required="true" id="email"/>
-                                <apex:inputField value="{!appointment.Telephone__c}"/>
-                                <apex:inputField value="{!appointment.Description__c}" id="formDesc"/>
+                                <apex:inputField value="{!appointment.RecordTypeId}" label="Appointment Type" id="recordType" styleClass="form-control"/>
+                                <apex:inputField value="{!contact.FirstName}" required="true" id="firstName" styleClass="form-control"/>
+                                <apex:inputField value="{!contact.LastName}" required="true" id="lastName" styleClass="form-control"/>
+                                <apex:inputField value="{!contact.Email}" required="true" id="email" styleClass="form-control"/>
+                                <apex:inputField value="{!appointment.Telephone__c}" styleClass="form-control"/>
+                                <apex:inputField value="{!appointment.Description__c}" id="formDesc" styleClass="form-control"/>
                             </apex:pageBlockSection>
                         </apex:pageBlock>
                     </div>

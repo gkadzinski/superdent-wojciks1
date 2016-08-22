@@ -1,94 +1,94 @@
 <apex:component controller="DEN_CalendarMonthController" allowDML="true">
     <style type="text/css">
-        .availabletrue {
-        	background-color: #5cb85c;
+        .availabletrue, .second .btn.availabletrue {
+        background: #5cb85c;
         }
         
-        .availablefalse {
-        	background-color: #d9534f;
+        .availablefalse, .second .btn.availablefalse {
+        background: #d9534f;
         }
         
         .day {
-        	cursor: pointer;
-        	width: 50px;
-        	height: 50px;
-        	border: solid 1px black;
-        	float: left;
-        	margin: 5px 5px;
-        	text-align: center;
+        cursor: pointer;
+        width: 50px;
+        height: 50px;
+        border: solid 1px black;
+        float: left;
+        margin: 5px 5px;
+        text-align: center;
         }
         
         .day:nth-child(7n+8) {
-        	clear: both;
+        clear: both;
         }
         
         .day:nth-child(7n+6), .day:nth-child(7n+7) {
-        	font-weight: bold;
-        	font-style: italic;
+        font-weight: bold;
+        font-style: italic;
         }
         
-        .selectedDay {
-        	background-color: #f0ad4e;
+        .selectedDay, .second .btn.selectedDay {
+        background: #f0ad4e;
         }
     </style>
     <script type="text/javascript">
-	    var timePicker;
-	    
-	    j$(document).ready(function() {
-	        hideTimePicker();
-	    });
-	    
-	    function hideTimePicker() {
-	        timePicker = j$('[id*=timePicker]');
-	        timePicker.hide();
-	    }
-	    
-	    function dateSelected(day) {
-	        j$('[id*=dayNumber]').each(function() {
-	            if (j$(this).text() == day) {
-	                if (j$(this).parent().hasClass('availabletrue')) {
-	                    j$('.selectedDay').removeClass('selectedDay');
-	                    j$(this).parent().addClass('selectedDay');
-	                    selectedDay(day);
-	                    timePicker = j$('[id*=timePicker]');
-	                    timePicker.show();
-	                } else {
-	                    alert('Please select available day (marked - Green)');
-                        hideLoading();
-                        return false;
-	                }
-	            }
-	        });
-	    }
-	    
-	    function verifyTimeAvailability(time) {
-            j$('[id*=timeSlot]').removeClass('selectedDay');
-	        j$('[id*=timeSlot]').each(function() {
-	            if (j$(this).text() == time) {
-	                if (j$(this).hasClass('availabletrue')) {
-                        j$(this).addClass('selectedDay');
-                        selectedTime(time);
-	                } else {
-	                    alert('Please select available Time (marked - Green)');
-	                    return false;
-	                }
-	            }
-	        });
-	    }
+    var timePicker;
     
-    	function openForm(locked) {
-            if (locked == 'true') {
-                alert('currently locked, please check again in 5 minutes, or select different slot');
-                return false;
-            } else {
-                openPopup();
+    j$(document).ready(function() {
+        hideTimePicker();
+    });
+    
+    function hideTimePicker() {
+        timePicker = j$('[id*=timePicker]');
+        timePicker.hide();
+    }
+    
+    function dateSelected(day) {
+        j$('[id*=dayNumber]').each(function() {
+            if (j$(this).text() == day) {
+                if (j$(this).parent().hasClass('availabletrue')) {
+                    j$('.selectedDay').removeClass('selectedDay');
+                    j$(this).parent().addClass('selectedDay');
+                    selectedDay(day);
+                    timePicker = j$('[id*=timePicker]');
+                    timePicker.show();
+                } else {
+                    alert('Please select available day (marked - Green)');
+                    hideLoading();
+                    return false;
+                }
             }
+        });
+    }
+    
+    function verifyTimeAvailability(time) {
+        j$('[id*=timeSlot]').removeClass('selectedDay');
+        j$('[id*=timeSlot]').each(function() {
+            if (j$(this).text() == time) {
+                if (j$(this).hasClass('availabletrue')) {
+                    j$(this).addClass('selectedDay');
+                    selectedTime(time);
+                } else {
+                    alert('Please select available Time (marked - Green)');
+                    return false;
+                }
+            }
+        });
+    }
+    
+    function openForm(locked) {
+        if (locked == 'true') {
+            alert('currently locked, please check again in 5 minutes, or select different slot');
+            return false;
+        } else {
+            openPopup();
         }
+    }
     </script>
     <apex:attribute name="dentist" description="to pass dentist ID to component" type="String" assignTo="{!dentistId}"/>
     <apex:attribute name="appoint" description="appointment object to communicate" type="DEN_Appointment__c" assignTo="{!appointment}"/>
-    <apex:pageBlock >
-        <apex:pageBlockSection columns="2">
+    <div>
+        <div class="col-xs-6">
             <apex:outputPanel id="datePicker">
                 <apex:outputLabel >Selected dentist: {!dentistName}</apex:outputLabel>
                 <apex:panelGrid columns="3">
@@ -108,15 +108,19 @@
                     </apex:actionFunction>
                 </apex:outputPanel>
             </apex:outputPanel>
-            <apex:outputPanel id="timePicker" style="height: 500px;">
-                <apex:pageBlockTable value="{!AllTimeSlots}" var="time" style="width: 20%;">
-                    <apex:column headerValue="TimeSlots" value="{!time.timePeriod}" onclick="verifyTimeAvailability('{!time.timePeriod}');" id="timeSlot" styleClass="available{!time.available}" style="cursor: pointer;"/>
-                </apex:pageBlockTable>
+        </div>
+        <div class="col-xs-6 second" style="width: 380px;">
+            <apex:outputPanel id="timePicker">
+                <apex:repeat value="{!AllTimeSlots}" var="time">
+                    <div onclick="verifyTimeAvailability('{!time.timePeriod}');" id="timeSlot" class="btn available{!time.available}" style="width: 100px; cursor: pointer; float: left; margin: 3px;">
+                        <apex:outputText value="{!time.timePeriod}"/>
+                    </div>
+                </apex:repeat>
                 <apex:actionFunction name="selectedTime" reRender="false" oncomplete="verifyLock();">
                     <apex:param assignTo="{!selectedTime}" name="selectedTime" value=""/>
                 </apex:actionFunction>
                 <apex:actionFunction name="verifyLock" action="{!verifyLock}" reRender="false" oncomplete="openForm('{!appointmentLocked}');"/>
             </apex:outputPanel>
-        </apex:pageBlockSection>
-    </apex:pageBlock>
+        </div>
+    </div>
 </apex:component>
