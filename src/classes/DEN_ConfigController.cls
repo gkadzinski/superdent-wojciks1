@@ -4,7 +4,7 @@ public class DEN_ConfigController {
     
     public DEN_Config__c config {get; set;}
     public Id rowId {get; set;}
-    public String configType {get; set;}    
+    public String configType {get; set;}
     public List<SelectOption> startHours {get; set;}
     public List<SelectOption> endHours {get; set;}
 
@@ -73,24 +73,20 @@ public class DEN_ConfigController {
         if (SPECIFIC_DATE.equals(configType) && config.Date__c == null) {
             ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO, 'Please specify date in \'Select Date\' field'));
             return null;
-        }
-        if (WEEKDAY.equals(configType) && String.isBlank(config.Weekday__c)) {
+        } else  if (WEEKDAY.equals(configType) && String.isBlank(config.Weekday__c)) {
             ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO, 'Please specify Weekday field'));
             return null;
-        }
-        if (config.StartingHour__c == null || config.EndingHour__c == null) {
+        } else if (config.StartingHour__c == null || config.EndingHour__c == null) {
             ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.INFO, 'Please specify Starting/Ending hours'));
             return null;
+        } else {
+            if (WEEKDAY.equals(configType)) config.Date__c = null;
+            if (SPECIFIC_DATE.equals(configType)) config.Weekday__c = null;
+            insert config;
+            config = new DEN_Config__c();
+            config.Dentist__c = UserInfo.getUserId();
+            return null;
         }
-        
-        if (WEEKDAY.equals(configType)) config.Date__c = null;
-        if (SPECIFIC_DATE.equals(configType)) config.Weekday__c = null;
-        
-        insert config;
-        config = new DEN_Config__c();
-        config.Dentist__c = UserInfo.getUserId();
-        
-        return null;
     }
                         
     public PageReference removeRow() {

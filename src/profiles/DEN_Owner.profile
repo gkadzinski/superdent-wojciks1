@@ -5,6 +5,14 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>DEN_AppointmentExtensionTest</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>DEN_AppointmentTriggerTest</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>DEN_CalendarMonthController</apexClass>
         <enabled>false</enabled>
     </classAccesses>
@@ -13,7 +21,15 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>DEN_ClientExtensionTest</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>DEN_ConfigController</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>DEN_ConfigControllerTest</apexClass>
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
